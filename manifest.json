@@ -5,7 +5,7 @@
     "minAppVersion": "0.11.13",
     "description": "Clear the images that you are not using anymore in your markdown notes to save space.",
     "author": "superbaseballman",
-    "authorUrl": "https://github.com/superbaseballman/oz-clear-unused-images-obsidian",
-    "fundingUrl": "https://github.com/superbaseballman/oz-clear-unused-images-obsidian",
+    "authorUrl": "https://github.com/superbaseballman/clear-unused-attachment-obsidian",
+    "fundingUrl": "https://github.com/superbaseballman/clear-unused-attachment-obsidian",
     "isDesktopOnly": false
 }

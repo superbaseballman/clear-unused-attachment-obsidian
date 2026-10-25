@@ -6,6 +6,8 @@
 
 如果任何图片文件没有在 vault 的任何文档中被引用，它们将被自动删除。
 
+> 本项目基于 [ozntel/oz-clear-unused-images-obsidian](https://github.com/ozntel/oz-clear-unused-images-obsidian) 修改，遵循 MIT 协议，原项目版权归 ozntel 所有。
+
 ## 🌍 国际化 (i18n)
 
 本插件现在支持多种语言！界面将根据您的 Obsidian 语言设置自动切换。
