@@ -1,23 +1,21 @@
 name: Build Obsidian Plugin
 
 on:
-  pull_request:
-    paths:
-      - "manifest.json"
-      - ".github/workflows/release.yml"
   push:
     branches:
-      - "**"
-    tags:
-      - "*"
+      - main
     paths:
       - "manifest.json"
+      - "package.json"
       - ".github/workflows/release.yml"
+      - "src/**"
+      - "main.js"
+      - "styles.css"
   workflow_dispatch:
     inputs:
       release_tag:
         description: "Existing version tag to publish"
-        required: true
+        required: false
         type: string
 
 jobs:
@@ -25,58 +23,73 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: write
-    
+
     steps:
       - uses: actions/checkout@v4
         with:
-          ref: ${{ github.event_name == 'workflow_dispatch' && format('refs/tags/{0}', inputs.release_tag) || github.ref }}
-      
+          fetch-depth: 0
+
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: "18"
-      
+
       - name: Install dependencies
         run: npm ci
-      
+
       - name: Build plugin
         run: npm run build
-      
-      - name: Create release package
+
+      - name: Read plugin version
+        id: version
+        shell: bash
+        run: echo "version=$(jq -r '.version' manifest.json)" >> "$GITHUB_OUTPUT"
+
+      - name: Check if release tag already exists
+        id: tag_check
+        shell: bash
+        env:
+          VERSION: ${{ steps.version.outputs.version }}
         run: |
-          # Get version from manifest.json
-          VERSION=$(jq -r '.version' manifest.json)
-          
-          # Create dist directory
+          if git ls-remote --tags origin "refs/tags/${VERSION}" | grep -q .; then
+            echo "exists=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "exists=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Create tag for version bump
+        if: github.event_name == 'push' && steps.tag_check.outputs.exists == 'false'
+        shell: bash
+        env:
+          VERSION: ${{ steps.version.outputs.version }}
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git tag "${VERSION}"
+          git push origin "${VERSION}"
+
+      - name: Create release package
+        shell: bash
+        env:
+          VERSION: ${{ steps.version.outputs.version }}
+        run: |
           mkdir -p dist
-          
-          # Copy plugin files to dist
           cp main.js manifest.json styles.css dist/
-          
-          # Create zip archive
           cd dist
-          zip -r ../clear-unused-attachment-${VERSION}.zip .
+          zip -r "../clear-unused-attachment-${VERSION}.zip" .
           cd ..
 
-      - name: Upload build artifact
-        if: ${{ github.event_name != 'workflow_dispatch' && !startsWith(github.ref, 'refs/tags/') }}
-        uses: actions/upload-artifact@v4
-        with:
-          name: plugin-build-${{ github.sha }}
-          path: clear-unused-attachment-*.zip
-          if-no-files-found: error
-      
       - name: Create Release
-        if: startsWith(github.ref, 'refs/tags/') || github.event_name == 'workflow_dispatch'
-        id: create_release
+        if: github.event_name == 'workflow_dispatch' || (github.event_name == 'push' && steps.tag_check.outputs.exists == 'false')
         uses: softprops/action-gh-release@v2
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          tag_name: ${{ github.event_name == 'workflow_dispatch' && inputs.release_tag || github.ref_name }}
-          name: Release ${{ github.event_name == 'workflow_dispatch' && inputs.release_tag || github.ref_name }}
+          tag_name: ${{ github.event_name == 'workflow_dispatch' && (inputs.release_tag != '' && inputs.release_tag || steps.version.outputs.version) || steps.version.outputs.version }}
+          name: Release ${{ github.event_name == 'workflow_dispatch' && (inputs.release_tag != '' && inputs.release_tag || steps.version.outputs.version) || steps.version.outputs.version }}
           draft: false
           prerelease: false
+          generate_release_notes: true
           files: |
             clear-unused-attachment-*.zip
             main.js
