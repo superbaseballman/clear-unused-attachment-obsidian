@@ -1,5 +1,5 @@
 import OzanClearImages from './main';
-import { PluginSettingTab, Setting, App, Notice, SettingDefinitionItem } from 'obsidian';
+import { PluginSettingTab, App, Notice, SettingDefinitionItem } from 'obsidian';
 import { i18n } from './i18n';
 
 export interface OzanClearImagesSettings {
@@ -115,91 +115,6 @@ export class OzanClearImagesSettingsTab extends PluginSettingTab {
         if (key === 'ribbonIcon') {
             this.plugin.refreshIconRibbon();
         }
-    }
-
-    display(): void {
-        const { containerEl } = this;
-        containerEl.empty();
-        new Setting(containerEl).setName(i18n.t('settings.title')).setHeading();
-
-        new Setting(containerEl)
-            .setName(i18n.t('settings.ribbonIcon.name'))
-            .setDesc(i18n.t('settings.ribbonIcon.desc'))
-            .addToggle((toggle) =>
-                toggle.setValue(this.plugin.settings.ribbonIcon).onChange((value) => {
-                    this.plugin.settings.ribbonIcon = value;
-                    this.persistSettings();
-                    this.plugin.refreshIconRibbon();
-                })
-            );
-
-        new Setting(containerEl)
-            .setName(i18n.t('settings.logsModal.name'))
-            .setDesc(
-                i18n.t('settings.logsModal.desc')
-            )
-            .addToggle((toggle) =>
-                toggle.setValue(this.plugin.settings.logsModal).onChange((value) => {
-                    this.plugin.settings.logsModal = value;
-                    this.persistSettings();
-                })
-            );
-
-        new Setting(containerEl)
-            .setName(i18n.t('settings.deleteOption.name'))
-            .setDesc(i18n.t('settings.deleteOption.desc'))
-            .addDropdown((dropdown) => {
-                dropdown.addOption('permanent', i18n.t('settings.deleteOption.permanent'));
-                dropdown.addOption('.trash', i18n.t('settings.deleteOption.obsidian.trash'));
-                dropdown.addOption('system-trash', i18n.t('settings.deleteOption.system.trash'));
-                dropdown.setValue(this.plugin.settings.deleteOption);
-                dropdown.onChange((option) => {
-                    this.plugin.settings.deleteOption = option;
-                    this.persistSettings();
-                });
-            });
-
-        new Setting(containerEl)
-            .setName(i18n.t('settings.excludedFolders.name'))
-            .setDesc(
-                i18n.t('settings.excludedFolders.desc')
-            )
-            .addTextArea((text) =>
-                text.setValue(this.plugin.settings.excludedFolders).onChange((value) => {
-                    this.plugin.settings.excludedFolders = value;
-                    this.persistSettings();
-                })
-            );
-        
-        new Setting(containerEl)
-            .setName(i18n.t('settings.excludedFiles.name'))
-            .setDesc(i18n.t('settings.excludedFiles.desc'))
-            .addTextArea((text) =>
-                text.setValue(this.plugin.settings.excludedFiles.join(',')).onChange((value) => {
-                    this.plugin.settings.excludedFiles = value.split(',');
-                    this.persistSettings();
-                })
-            );
-
-        new Setting(containerEl)
-            .setName(i18n.t('settings.excludeSubfolders.name'))
-            .setDesc(i18n.t('settings.excludeSubfolders.desc'))
-            .addToggle((toggle) =>
-                toggle.setValue(this.plugin.settings.excludeSubfolders).onChange((value) => {
-                    this.plugin.settings.excludeSubfolders = value;
-                    this.persistSettings();
-                })
-            );
-
-        const coffeeDiv = containerEl.createDiv('coffee');
-        coffeeDiv.addClass('oz-coffee-div');
-        const coffeeLink = coffeeDiv.createEl('a', { href: 'https://ko-fi.com/L3L356V6Q' });
-        const coffeeImg = coffeeLink.createEl('img', {
-            attr: {
-                src: 'https://cdn.ko-fi.com/cdn/kofi2.png?v=3',
-            },
-        });
-        coffeeImg.height = 45;
     }
 
     private persistSettings(): void {

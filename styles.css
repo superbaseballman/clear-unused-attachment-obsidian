@@ -28,8 +28,6 @@
     flex-grow: 1;
     cursor: pointer;
     text-decoration: underline;
-    text-decoration-color: var(--text-muted);
-    text-decoration-style: dotted;
 }
 
 .clickable-file-path:hover {

@@ -32,7 +32,7 @@ export default class OzanClearImages extends Plugin {
             },
         });
         this.addCommand({
-            id: 'clear-unused-attachments',
+            id: 'clear-attachments',
             name: i18n.t('command.clear.attachments'),
             callback: () => {
                 void this.clearUnusedAttachments('all');
