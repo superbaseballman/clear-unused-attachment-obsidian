@@ -1,24 +1,33 @@
 name: Build Obsidian Plugin
 
 on:
+  pull_request:
+    paths:
+      - "manifest.json"
+      - ".github/workflows/release.yml"
   push:
+    branches:
+      - "**"
     tags:
       - "*"
+    paths:
+      - "manifest.json"
+      - ".github/workflows/release.yml"
 
 jobs:
   build:
     runs-on: ubuntu-latest
     
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       
       - name: Setup Node.js
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v4
         with:
           node-version: "18"
       
       - name: Install dependencies
-        run: npm install
+        run: npm ci
       
       - name: Build plugin
         run: npm run build
@@ -36,16 +45,25 @@ jobs:
           
           # Create zip archive
           cd dist
-          zip -r ../oz-clear-unused-images-${VERSION}.zip .
+          zip -r ../clear-unused-attachment-${VERSION}.zip .
           cd ..
+
+      - name: Upload build artifact
+        if: ${{ !startsWith(github.ref, 'refs/tags/') }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: plugin-build-${{ github.sha }}
+          path: clear-unused-attachment-*.zip
+          if-no-files-found: error
       
       - name: Create Release
+        if: startsWith(github.ref, 'refs/tags/')
         id: create_release
-        uses: softprops/action-gh-release@v1
+        uses: softprops/action-gh-release@v2
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          tag_name: ${{ github.ref }}
+          tag_name: ${{ github.ref_name }}
           name: Release ${{ github.ref_name }}
           draft: false
           prerelease: false
