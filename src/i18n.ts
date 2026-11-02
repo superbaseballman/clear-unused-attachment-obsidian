@@ -234,7 +234,7 @@ export class I18nManager {
 
     initialize(app: App): void {
         this.app = app;
-        const storedLanguage = app.loadLocalStorage('clear-unused-attachment-language');
+        const storedLanguage = app.loadLocalStorage('clear-unused-attachment-language') as unknown;
         if (typeof storedLanguage === 'string' && isLanguage(storedLanguage)) {
             this.userSelectedLanguage = storedLanguage;
         }
@@ -299,15 +299,16 @@ export class I18nManager {
      * @param params 可选的参数替换对象
      */
     t(key: keyof I18nTranslations, params?: Record<string, string>): string {
-        let text = this.translations[key] || enTranslations[key] || key;
-        
+        const fallbackText = this.translations[key] ?? enTranslations[key] ?? String(key);
+        let text = fallbackText;
+
         // 如果有参数，进行替换
         if (params) {
             Object.entries(params).forEach(([paramKey, paramValue]) => {
                 text = text.replace(new RegExp(`\\{${paramKey}\\}`, 'g'), paramValue);
             });
         }
-        
+
         return text;
     }
 }

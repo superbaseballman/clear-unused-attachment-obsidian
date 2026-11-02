@@ -143,11 +143,8 @@ export class SelectiveDeleteModal extends Modal {
                 continue;
             }
 
-            if (deleteOption === '.trash') {
+            if (deleteOption === '.trash' || deleteOption === 'system-trash') {
                 await this.plugin.app.fileManager.trashFile(file);
-            } else if (deleteOption === 'system-trash') {
-                // This explicit option overrides Obsidian's configured trash destination.
-                await this.plugin.app.vault.trash(file, true);
             } else if (deleteOption === 'permanent') {
                 await this.plugin.app.vault.delete(file);
             } else {

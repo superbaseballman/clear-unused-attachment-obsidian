@@ -134,13 +134,14 @@ export const deleteFilesInTheList = async (
         if (fileIsInExcludedFolder(file, plugin)) {
             continue;
         } else {
-            if (deleteOption === '.trash') {
+            if (deleteOption === '.trash' || deleteOption === 'system-trash') {
+                // Respect the user's configured trash destination instead of bypassing
+                // the file manager's validated deletion flow.
                 await app.fileManager.trashFile(file);
-                textToView += `[+] ${i18n.t('logs.moved.obsidian.trash')}: ${file.path}\n`;
-            } else if (deleteOption === 'system-trash') {
-                // This explicit option overrides Obsidian's configured trash destination.
-                await app.vault.trash(file, true);
-                textToView += `[+] ${i18n.t('logs.moved.system.trash')}: ${file.path}\n`;
+                textToView +=
+                    deleteOption === 'system-trash'
+                        ? `[+] ${i18n.t('logs.moved.system.trash')}: ${file.path}\n`
+                        : `[+] ${i18n.t('logs.moved.obsidian.trash')}: ${file.path}\n`;
             } else if (deleteOption === 'permanent') {
                 await app.vault.delete(file);
                 textToView += `[+] ${i18n.t('logs.deleted.permanently')}: ${file.path}\n`;

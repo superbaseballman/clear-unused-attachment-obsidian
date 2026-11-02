@@ -1,7 +1,7 @@
 {
     "id": "clear-unused-attachment",
     "name": "Clear Unused Attachment",
-    "version": "1.1.4",
+    "version": "1.1.5",
     "minAppVersion": "1.13.0",
     "description": "Clear the images that you are not using anymore in your markdown notes to save space.",
     "author": "superbaseballman",
