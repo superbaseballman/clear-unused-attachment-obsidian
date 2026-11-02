@@ -1,5 +1,4 @@
-import { Notice } from 'obsidian';
-import OzanClearImages from './main';
+import { App, getLanguage } from 'obsidian';
 
 // 定义支持的语言类型
 export type Language = 'en' | 'zh-cn' | 'zh-tw';
@@ -227,8 +226,18 @@ export class I18nManager {
     private currentLanguage: Language = 'en';
     private translations: Partial<I18nTranslations> = enTranslations;
     private userSelectedLanguage: Language | null = null;
+    private app: App | null = null;
 
     constructor() {
+        this.detectLanguage();
+    }
+
+    initialize(app: App): void {
+        this.app = app;
+        const storedLanguage = app.loadLocalStorage('clear-unused-attachment-language');
+        if (typeof storedLanguage === 'string' && isLanguage(storedLanguage)) {
+            this.userSelectedLanguage = storedLanguage;
+        }
         this.detectLanguage();
     }
 
@@ -237,40 +246,23 @@ export class I18nManager {
      * 优先使用用户选择的语言，否则自动检测系统语言
      */
     private detectLanguage() {
-        // 如果用户已选择语言，使用用户选择的语言
         if (this.userSelectedLanguage) {
             this.currentLanguage = this.userSelectedLanguage;
             this.translations = translationsMap[this.userSelectedLanguage];
             return;
         }
-        
-        // 否则，尝试从 localStorage 获取 Obsidian 的语言设置
-        try {
-            const storedLanguage = localStorage.getItem('language');
-            if (storedLanguage && translationsMap[storedLanguage as Language]) {
-                this.currentLanguage = storedLanguage as Language;
-                this.translations = translationsMap[this.currentLanguage];
-                console.log(`[i18n] Language loaded from storage: ${this.currentLanguage}`);
-                return;
-            }
-        } catch (e) {
-            console.warn('[i18n] Could not load language from storage:', e);
-        }
-        
-        // 最后，使用浏览器语言作为后备
-        const browserLang = navigator.language.toLowerCase();
-        if (browserLang.startsWith('zh-cn') || browserLang.startsWith('zh')) {
-            this.currentLanguage = 'zh-cn';
-            this.translations = zhCNTranslations;
-        } else if (browserLang.startsWith('zh-tw') || browserLang.startsWith('zh-hk')) {
+
+        const language = getLanguage().toLowerCase().replace('_', '-');
+        if (language.startsWith('zh-tw') || language.startsWith('zh-hk')) {
             this.currentLanguage = 'zh-tw';
             this.translations = zhTWTranslations;
+        } else if (language.startsWith('zh')) {
+            this.currentLanguage = 'zh-cn';
+            this.translations = zhCNTranslations;
         } else {
             this.currentLanguage = 'en';
             this.translations = enTranslations;
         }
-        
-        console.log(`[i18n] Language detected from browser: ${this.currentLanguage}`);
     }
 
     /**
@@ -281,15 +273,7 @@ export class I18nManager {
             this.userSelectedLanguage = lang;
             this.currentLanguage = lang;
             this.translations = translationsMap[lang];
-            
-            // 保存到 localStorage
-            try {
-                localStorage.setItem('language', lang);
-            } catch (e) {
-                console.warn('[i18n] Could not save language to storage:', e);
-            }
-            
-            console.log(`[i18n] Language changed to: ${lang}`);
+            this.app?.saveLocalStorage('clear-unused-attachment-language', lang);
         }
     }
 
@@ -305,6 +289,7 @@ export class I18nManager {
      */
     resetToAuto() {
         this.userSelectedLanguage = null;
+        this.app?.saveLocalStorage('clear-unused-attachment-language', null);
         this.detectLanguage();
     }
 
@@ -326,6 +311,9 @@ export class I18nManager {
         return text;
     }
 }
+
+const isLanguage = (language: string): language is Language =>
+    language === 'en' || language === 'zh-cn' || language === 'zh-tw';
 
 // 导出单例
 export const i18n = new I18nManager();

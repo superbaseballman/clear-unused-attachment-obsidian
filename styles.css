@@ -3,6 +3,10 @@
     margin-top: 5px;
 }
 
+.unused-images-log-content {
+    white-space: pre-line;
+}
+
 .unused-images-center-wrapper {
     display: flex;
     align-items: center;

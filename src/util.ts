@@ -1,22 +1,18 @@
-import { App, TFile} from 'obsidian';
-import OzanClearImages from './main';
-import { getAllLinkMatchesInFile, LinkMatch } from './linkDetector';
+import { App, TFile, Notice } from 'obsidian';
+import type OzanClearImages from './main';
+import { getAllLinkMatchesInFile } from './linkDetector';
 import { i18n } from './i18n';
 
 /* ------------------ Image Handlers  ------------------ */
 
 const imageRegex = /.*(jpe?g|png|gif|svg|bmp)/i;
-const bannerRegex = /!\[\[(.*?)\]\]/i;
 const imageExtensions: Set<string> = new Set(['jpeg', 'jpg', 'png', 'gif', 'svg', 'bmp', 'webp']);
 
 // Create the List of Unused Images
 export const getUnusedAttachments = async (app: App, type: 'image' | 'all') => {
-    var allAttachmentsInVault: TFile[] = getAttachmentsInVault(app, type);
-    var unusedAttachments: TFile[] = [];
-    var usedAttachmentsSet: Set<string>;
-
-    // Get Used Attachments in All Markdown Files
-    usedAttachmentsSet = await getAttachmentPathSetForVault(app);
+    const allAttachmentsInVault = getAttachmentsInVault(app, type);
+    const unusedAttachments: TFile[] = [];
+    const usedAttachmentsSet = await getAttachmentPathSetForVault(app);
 
     // Compare All Attachments vs Used Attachments
     allAttachmentsInVault.forEach((attachment) => {
@@ -28,17 +24,17 @@ export const getUnusedAttachments = async (app: App, type: 'image' | 'all') => {
 
 // Getting all available images saved in vault
 const getAttachmentsInVault = (app: App, type: 'image' | 'all'): TFile[] => {
-    let allFiles: TFile[] = app.vault.getFiles();
-    let attachments: TFile[] = [];
-    for (let i = 0; i < allFiles.length; i++) {
-        if (!['md', 'canvas'].includes(allFiles[i].extension)) {
+    const allFiles = app.vault.getFiles();
+    const attachments: TFile[] = [];
+    for (const file of allFiles) {
+        if (!['md', 'canvas'].includes(file.extension)) {
             // Only images
-            if (imageExtensions.has(allFiles[i].extension.toLowerCase())) {
-                attachments.push(allFiles[i]);
+            if (imageExtensions.has(file.extension.toLowerCase())) {
+                attachments.push(file);
             }
             // All Files
             else if (type === 'all') {
-                attachments.push(allFiles[i]);
+                attachments.push(file);
             }
         }
     }
@@ -48,13 +44,12 @@ const getAttachmentsInVault = (app: App, type: 'image' | 'all'): TFile[] => {
 // New Method for Getting All Used Attachments
 const getAttachmentPathSetForVault = async (app: App): Promise<Set<string>> => {
     const attachmentsSet = new Set<string>();
-    // 用公开类型替代未导出的 MetadataCacheResolvedLinks
-    const resolvedLinks = app.metadataCache.resolvedLinks as Record<string, Record<string, number>>;
+    const resolvedLinks = app.metadataCache.resolvedLinks;
 
     // 步骤 1：使用官方 API 获取所有已解析的链接（核心场景）
     if (resolvedLinks) {
-        for (const [sourceFilePath, linkMap] of Object.entries(resolvedLinks)) {
-            for (const [targetPath, _count] of Object.entries(linkMap)) {
+        for (const linkMap of Object.values(resolvedLinks)) {
+            for (const targetPath of Object.keys(linkMap)) {
                 if (!targetPath.endsWith('.md')) {
                     addToSet(attachmentsSet, targetPath);
                 }
@@ -69,7 +64,7 @@ const getAttachmentPathSetForVault = async (app: App): Promise<Set<string>> => {
         if (file.extension === 'md') {
             const fileCache = app.metadataCache.getFileCache(file);
             if (fileCache?.frontmatter) {
-                for (const [_key, value] of Object.entries(fileCache.frontmatter)) {
+                for (const value of Object.values(fileCache.frontmatter)) {
                     if (typeof value === 'string' && pathIsAnImage(value)) {
                         const resolvedFile = app.metadataCache.getFirstLinkpathDest(value, file.path);
                         if (resolvedFile instanceof TFile) {
@@ -86,10 +81,11 @@ const getAttachmentPathSetForVault = async (app: App): Promise<Set<string>> => {
         else if (file.extension === 'canvas') {
             try {
                 const canvasContent = await app.vault.cachedRead(file);
-                const canvasData = JSON.parse(canvasContent);
+                const canvasData: unknown = JSON.parse(canvasContent) as unknown;
                 
-                if (Array.isArray(canvasData.nodes)) {
+                if (isRecord(canvasData) && Array.isArray(canvasData.nodes)) {
                     for (const node of canvasData.nodes) {
+                        if (!isRecord(node)) continue;
                         // 处理 Canvas 中的文件节点
                         if (node.type === 'file' && typeof node.file === 'string') {
                             addToSet(attachmentsSet, node.file);
@@ -106,8 +102,9 @@ const getAttachmentPathSetForVault = async (app: App): Promise<Set<string>> => {
                         }
                     }
                 }
-            } catch (e) {
-                console.warn(`解析 Canvas 文件失败：${file.path}`, e);
+            } catch (error) {
+                const message = error instanceof Error ? error.message : String(error);
+                new Notice(`Could not scan canvas file ${file.path}: ${message}`);
             }
         }
     }
@@ -119,7 +116,10 @@ const pathIsAnImage = (path: string) => {
     return path.match(imageRegex);
 };
 
-/* ------------------ Deleting Handlers  ------------------ */
+const isRecord = (value: unknown): value is Record<string, unknown> =>
+    typeof value === 'object' && value !== null;
+
+/* ------------------ Deleting Handlers ------------------ */
 
 // Clear Images From the Provided List
 export const deleteFilesInTheList = async (
@@ -127,22 +127,25 @@ export const deleteFilesInTheList = async (
     plugin: OzanClearImages,
     app: App
 ): Promise<{ deletedImages: number; textToView: string }> => {
-    var deleteOption = plugin.settings.deleteOption;
-    var deletedImages = 0;
+    const deleteOption = plugin.settings.deleteOption;
+    let deletedImages = 0;
     let textToView = '';
-    for (let file of fileList) {
+    for (const file of fileList) {
         if (fileIsInExcludedFolder(file, plugin)) {
-            console.log('File not referenced but excluded: ' + file.path);
+            continue;
         } else {
             if (deleteOption === '.trash') {
-                await app.vault.trash(file, false);
-                textToView += `[+] ${i18n.t('logs.moved.obsidian.trash')}: ` + file.path + '</br>';
+                await app.fileManager.trashFile(file);
+                textToView += `[+] ${i18n.t('logs.moved.obsidian.trash')}: ${file.path}\n`;
             } else if (deleteOption === 'system-trash') {
+                // This explicit option overrides Obsidian's configured trash destination.
                 await app.vault.trash(file, true);
-                textToView += `[+] ${i18n.t('logs.moved.system.trash')}: ` + file.path + '</br>';
+                textToView += `[+] ${i18n.t('logs.moved.system.trash')}: ${file.path}\n`;
             } else if (deleteOption === 'permanent') {
                 await app.vault.delete(file);
-                textToView += `[+] ${i18n.t('logs.deleted.permanently')}: ` + file.path + '</br>';
+                textToView += `[+] ${i18n.t('logs.deleted.permanently')}: ${file.path}\n`;
+            } else {
+                throw new Error(`Unsupported delete option: ${deleteOption}`);
             }
             deletedImages++;
         }
@@ -152,13 +155,13 @@ export const deleteFilesInTheList = async (
 
 // Check if File is Under Excluded Folders
 export const fileIsInExcludedFolder = (file: TFile, plugin: OzanClearImages): boolean => {
-    var excludedFoldersSettings = plugin.settings.excludedFolders;
-    var excludeSubfolders = plugin.settings.excludeSubfolders;
+    const excludedFoldersSettings = plugin.settings.excludedFolders;
+    const excludeSubfolders = plugin.settings.excludeSubfolders;
     if (excludedFoldersSettings === '') {
         return false;
     } else {
         // Get All Excluded Folder Paths
-        var excludedFolderPaths = excludedFoldersSettings.split(',').map((folderPath) => {
+        const excludedFolderPaths = excludedFoldersSettings.split(',').map((folderPath) => {
             return folderPath.trim();
         });
 
@@ -169,7 +172,7 @@ export const fileIsInExcludedFolder = (file: TFile, plugin: OzanClearImages): bo
 
         if (excludeSubfolders) {
             // If subfolders included, check if the file's parent path starts with any excluded folder path
-            for (let excludedFolderPath of excludedFolderPaths) {
+            for (const excludedFolderPath of excludedFolderPaths) {
                 // Normalize the excluded path to ensure proper matching by adding a trailing slash
                 // This prevents partial matches like 'Attach' matching 'Attachment'
                 let normalizedExcludedPath = excludedFolderPath;
@@ -212,7 +215,5 @@ export const getFormattedDate = () => {
 };
 
 const addToSet = (setObj: Set<string>, value: string) => {
-    if (!setObj.has(value)) {
-        setObj.add(value);
-    }
+    setObj.add(value);
 };

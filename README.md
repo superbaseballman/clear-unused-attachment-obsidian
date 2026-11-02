@@ -1,3 +1,105 @@
+# Clear Unused Attachments for Obsidian
+
+**English** | [简体中文](#中文说明)
+
+Find and remove attachments that are no longer referenced in your vault. The plugin scans Markdown notes, Canvas files, and supported frontmatter references, then lets you review and select unused files before deleting them.
+
+> Requires Obsidian 1.13.0 or later.
+
+This project is a fork of [ozntel/oz-clear-unused-images-obsidian](https://github.com/ozntel/oz-clear-unused-images-obsidian). It is distributed under the MIT License; the original project is copyrighted by ozntel.
+
+## 🌍 Languages
+
+The interface follows your Obsidian language setting. English is used when the Obsidian language is not supported.
+
+Supported languages:
+- English
+- Simplified Chinese
+- Traditional Chinese
+
+## Settings
+
+### Ribbon icon
+
+Enable this option to add a cleanup icon to the ribbon.
+![Ribbon icon setting](images/ribbon-icon-settings.png)
+
+### Deletion destination
+
+Choose how deleted files should be handled:
+
+![Deletion destination setting](images/delete-destination.png)
+
+1. **Move to Obsidian trash** — Use Obsidian's configured trash preference.
+2. **Move to system trash** — Move files to the operating system's trash.
+3. **Delete permanently** — Permanently delete files; this cannot be undone.
+
+### Excluded folders
+
+Add comma-separated vault-relative folder paths to exclude files in those folders from cleanup.
+
+![Excluded folders setting](images/excluded-folders.png)
+
+Enable the subfolder option to also exclude files in subfolders.
+
+![Exclude subfolders setting](images/exclude-subfolders.png)
+
+### Ignore specific files
+
+The cleanup dialog lists unused files with checkboxes. Select **Ignore this file** to add a file to the exclusion list so it is omitted from future scans. Ignored paths are saved in the plugin's `data.json`.
+
+## Usage
+
+1. Enable the plugin in **Community plugins**.
+2. Start a scan using either method:
+   - Enable the ribbon icon in the plugin settings and click it.
+   - Open the command palette with `Ctrl/Cmd + P` and run **Clear unused images** or **Clear unused attachments**.
+
+   ![Cleanup commands](images/Clear-Command.png)
+
+3. Review the unused files in the dialog, select the files to remove, and choose **Delete selected**. You can open a listed file by clicking its path.
+
+If all files are in use or excluded, the plugin shows a notice and does not open the selection dialog.
+
+**Image formats scanned:** jpg, jpeg, png, gif, svg, bmp, webp
+
+## Planned features
+
+- [x] Choose a destination for deleted files
+- [x] Exclude folders from scans
+- [x] Internationalization (i18n)
+
+## Development
+
+### Build
+
+```bash
+# Install dependencies
+npm install
+
+# Development build with watch mode
+npm run dev
+
+# Production build
+npm run build
+```
+
+### Add a translation
+
+Contributions for additional languages are welcome. See [doc/i18n.md](doc/i18n.md) for instructions.
+
+## License
+
+MIT License
+
+## Acknowledgments
+
+Thanks to all contributors and the Obsidian community for their support!
+
+---
+
+## 中文说明
+
 # Obsidian 清除未使用图片插件
 
 本插件通过删除不再在 Markdown 笔记中引用的图片，帮助您保持 vault 的整洁。
@@ -113,9 +215,3 @@ MIT License
 ## 致谢
 
 特别感谢所有贡献者和 Obsidian 社区的支持!
-
-
-
-
-
-

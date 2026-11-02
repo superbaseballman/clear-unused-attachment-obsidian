@@ -50,7 +50,7 @@ jobs:
           draft: false
           prerelease: false
           files: |
-            oz-clear-unused-images-*.zip
+            clear-unused-attachment-*.zip
             main.js
             manifest.json
             styles.css
