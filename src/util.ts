@@ -103,8 +103,7 @@ const getAttachmentPathSetForVault = async (app: App): Promise<Set<string>> => {
                     }
                 }
             } catch (error) {
-                const message = error instanceof Error ? error.message : String(error);
-                new Notice(`Could not scan canvas file ${file.path}: ${message}`);
+                new Notice(`Could not scan canvas file ${file.path}: ${getErrorMessage(error)}`);
             }
         }
     }
@@ -127,27 +126,16 @@ export const deleteFilesInTheList = async (
     plugin: OzanClearImages,
     app: App
 ): Promise<{ deletedImages: number; textToView: string }> => {
-    const deleteOption = plugin.settings.deleteOption;
     let deletedImages = 0;
     let textToView = '';
     for (const file of fileList) {
         if (fileIsInExcludedFolder(file, plugin)) {
             continue;
         } else {
-            if (deleteOption === '.trash' || deleteOption === 'system-trash') {
-                // Respect the user's configured trash destination instead of bypassing
-                // the file manager's validated deletion flow.
-                await app.fileManager.trashFile(file);
-                textToView +=
-                    deleteOption === 'system-trash'
-                        ? `[+] ${i18n.t('logs.moved.system.trash')}: ${file.path}\n`
-                        : `[+] ${i18n.t('logs.moved.obsidian.trash')}: ${file.path}\n`;
-            } else if (deleteOption === 'permanent') {
-                await app.vault.delete(file);
-                textToView += `[+] ${i18n.t('logs.deleted.permanently')}: ${file.path}\n`;
-            } else {
-                throw new Error(`Unsupported delete option: ${deleteOption}`);
-            }
+            // FileManager honours the user's configured deletion destination
+            // (Obsidian trash, system trash or permanent deletion).
+            await app.fileManager.trashFile(file);
+            textToView += `[+] ${i18n.t('logs.moved.trash')}: ${file.path}\n`;
             deletedImages++;
         }
     }
@@ -217,4 +205,28 @@ export const getFormattedDate = () => {
 
 const addToSet = (setObj: Set<string>, value: string) => {
     setObj.add(value);
+};
+
+// Errors and rejected values are `unknown`, so they must be narrowed before being shown to the user.
+export const getErrorMessage = (error: unknown): string => {
+    if (error instanceof Error) {
+        return error.message;
+    }
+    if (typeof error === 'string') {
+        return error;
+    }
+    if (typeof error === 'number' || typeof error === 'boolean' || typeof error === 'bigint') {
+        return String(error);
+    }
+    if (error !== null && typeof error === 'object') {
+        try {
+            const serialized = JSON.stringify(error);
+            if (typeof serialized === 'string') {
+                return serialized;
+            }
+        } catch {
+            // Non-serializable values fall back to the generic message below.
+        }
+    }
+    return 'Unknown error';
 };

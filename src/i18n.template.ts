@@ -42,11 +42,6 @@ interface TemplateI18nTranslations {
     'settings.ribbonIcon.desc': string;
     'settings.logsModal.name': string;
     'settings.logsModal.desc': string;
-    'settings.deleteOption.name': string;
-    'settings.deleteOption.desc': string;
-    'settings.deleteOption.permanent': string;
-    'settings.deleteOption.obsidian.trash': string;
-    'settings.deleteOption.system.trash': string;
     'settings.excludedFolders.name': string;
     'settings.excludedFolders.desc': string;
     'settings.excludedFiles.name': string;
@@ -63,9 +58,7 @@ interface TemplateI18nTranslations {
     'modal.file.path.click.hint': string;
     
     // 删除日志
-    'logs.moved.obsidian.trash': string;
-    'logs.moved.system.trash': string;
-    'logs.deleted.permanently': string;
+    'logs.moved.trash': string;
 }
 
 // 以下是完整的翻译键列表 - 请为每个键提供你的语言翻译
@@ -99,11 +92,6 @@ const yourLanguageTranslations: Partial<TemplateI18nTranslations> = {
     'settings.ribbonIcon.desc': '',                // 开启后将在功能区显示清除图片的图标
     'settings.logsModal.name': '',                 // 删除日志
     'settings.logsModal.desc': '',                 // 关闭后将不会在删除完成后弹出查看删除日志的模态框
-    'settings.deleteOption.name': '',              // 已删除图片的目标位置
-    'settings.deleteOption.desc': '',              // 选择图片删除后的存放位置
-    'settings.deleteOption.permanent': '',         // 永久删除
-    'settings.deleteOption.obsidian.trash': '',    // 移动到 Obsidian 回收站
-    'settings.deleteOption.system.trash': '',      // 移动到系统回收站
     'settings.excludedFolders.name': '',           // 排除的文件夹完整路径
     'settings.excludedFolders.desc': '',           // 提供要排除的文件夹的完整路径（区分大小写）
     'settings.excludedFiles.name': '',             // 排除的文件完整路径
@@ -120,9 +108,7 @@ const yourLanguageTranslations: Partial<TemplateI18nTranslations> = {
     'modal.file.path.click.hint': '',      // 点击打开文件
     
     // ==================== 删除日志 ====================
-    'logs.moved.obsidian.trash': '',       // 移动到 Obsidian 回收站
-    'logs.moved.system.trash': '',         // 移动到系统回收站
-    'logs.deleted.permanently': '',        // 永久删除
+    'logs.moved.trash': '',                // 移动到回收站
 };
 
 /*
@@ -153,11 +139,6 @@ const yourLanguageTranslations: Partial<TemplateI18nTranslations> = {
  *     'settings.ribbonIcon.desc': 'リボンに画像クリアのアイコンを表示します。',
  *     'settings.logsModal.name': '削除ログ',
  *     'settings.logsModal.desc': '削除完了後にログモーダルを表示します。',
- *     'settings.deleteOption.name': '削除された画像の宛先',
- *     'settings.deleteOption.desc': '削除された画像の保存先を選択します',
- *     'settings.deleteOption.permanent': '完全に削除',
- *     'settings.deleteOption.obsidian.trash': 'Obsidian ゴミ箱に移動',
- *     'settings.deleteOption.system.trash': 'システムゴミ箱に移動',
  *     'settings.excludedFolders.name': '除外するフォルダーのフルパス',
  *     'settings.excludedFolders.desc': '除外するフォルダーのフルパスをカンマ区切りで指定します（大文字小文字を区別）。',
  *     'settings.excludedFiles.name': '除外するファイルのフルパス',
@@ -172,9 +153,7 @@ const yourLanguageTranslations: Partial<TemplateI18nTranslations> = {
  *     'modal.ignore.file': 'このファイルを無視',
  *     'modal.file.path.click.hint': 'クリックしてファイルを開く',
  *     
- *     'logs.moved.obsidian.trash': 'Obsidian ゴミ箱に移動',
- *     'logs.moved.system.trash': 'システムゴミ箱に移動',
- *     'logs.deleted.permanently': '完全に削除',
+ *     'logs.moved.trash': 'ゴミ箱に移動',
  * };
  */
 

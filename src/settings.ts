@@ -1,9 +1,9 @@
 import OzanClearImages from './main';
 import { PluginSettingTab, App, Notice, SettingDefinitionItem } from 'obsidian';
 import { i18n } from './i18n';
+import { getErrorMessage } from './util';
 
 export interface OzanClearImagesSettings {
-    deleteOption: string;
     logsModal: boolean;
     excludedFolders: string;
     ribbonIcon: boolean;
@@ -12,7 +12,6 @@ export interface OzanClearImagesSettings {
 }
 
 export const DEFAULT_SETTINGS: OzanClearImagesSettings = {
-    deleteOption: '.trash',
     logsModal: true,
     excludedFolders: '',
     ribbonIcon: false,
@@ -43,20 +42,6 @@ export class OzanClearImagesSettingsTab extends PluginSettingTab {
                         name: i18n.t('settings.logsModal.name'),
                         desc: i18n.t('settings.logsModal.desc'),
                         control: { type: 'toggle', key: 'logsModal', defaultValue: true },
-                    },
-                    {
-                        name: i18n.t('settings.deleteOption.name'),
-                        desc: i18n.t('settings.deleteOption.desc'),
-                        control: {
-                            type: 'dropdown',
-                            key: 'deleteOption',
-                            defaultValue: '.trash',
-                            options: {
-                                permanent: i18n.t('settings.deleteOption.permanent'),
-                                '.trash': i18n.t('settings.deleteOption.obsidian.trash'),
-                                'system-trash': i18n.t('settings.deleteOption.system.trash'),
-                            },
-                        },
                     },
                     {
                         name: i18n.t('settings.excludedFolders.name'),
@@ -119,8 +104,7 @@ export class OzanClearImagesSettingsTab extends PluginSettingTab {
 
     private persistSettings(): void {
         void this.plugin.saveSettings().catch((error: unknown) => {
-            const message = error instanceof Error ? error.message : String(error);
-            new Notice(`Failed to save settings: ${message}`);
+            new Notice(`Failed to save settings: ${getErrorMessage(error)}`);
         });
     }
 }

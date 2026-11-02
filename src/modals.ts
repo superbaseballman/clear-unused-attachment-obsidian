@@ -1,7 +1,7 @@
 import { Modal, App, TFile, Notice } from 'obsidian';
 import { i18n } from './i18n';
 import type OzanClearImages from './main';
-import { fileIsInExcludedFolder } from './util';
+import { fileIsInExcludedFolder, getErrorMessage } from './util';
 
 export class LogsModal extends Modal {
     constructor(textToView: string, app: App) {
@@ -12,10 +12,10 @@ export class LogsModal extends Modal {
     textToView: string;
 
     onOpen(): void {
-        const logs = this.contentEl.createEl('div', { cls: 'unused-images-logs unused-images-log-content' });
+        const logs = this.contentEl.createDiv({ cls: 'unused-images-logs unused-images-log-content' });
         logs.setText(this.textToView);
 
-        const buttonWrapper = this.contentEl.createEl('div', { cls: 'unused-images-center-wrapper' });
+        const buttonWrapper = this.contentEl.createDiv({ cls: 'unused-images-center-wrapper' });
         const closeButton = buttonWrapper.createEl('button', { text: i18n.t('close'), cls: 'unused-images-button' });
         closeButton.addEventListener('click', () => this.close());
     }
@@ -30,17 +30,17 @@ export class SelectiveDeleteModal extends Modal {
     }
 
     onOpen(): void {
-        const fileListContainer = this.contentEl.createEl('div', {
+        const fileListContainer = this.contentEl.createDiv({
             cls: 'unused-images-file-list unused-images-logs',
         });
 
         this.unusedFiles.forEach((file) => {
-            const fileItem = fileListContainer.createEl('div', { cls: 'unused-file-item' });
+            const fileItem = fileListContainer.createDiv({ cls: 'unused-file-item' });
             const checkbox = fileItem.createEl('input', { type: 'checkbox', value: file.path });
             checkbox.addClass('file-checkbox');
             checkbox.checked = true;
 
-            const fileName = fileItem.createEl('span', { text: file.path, cls: 'clickable-file-path' });
+            const fileName = fileItem.createSpan({ text: file.path, cls: 'clickable-file-path' });
             fileName.addEventListener('click', () => {
                 void this.plugin.app.workspace.getLeaf().openFile(file).catch((error: unknown) => {
                     new Notice(`Failed to open file: ${getErrorMessage(error)}`);
@@ -56,7 +56,7 @@ export class SelectiveDeleteModal extends Modal {
             });
         });
 
-        const buttonWrapper = this.contentEl.createEl('div', {
+        const buttonWrapper = this.contentEl.createDiv({
             cls: 'unused-images-center-wrapper modal-buttons',
         });
 
@@ -135,7 +135,6 @@ export class SelectiveDeleteModal extends Modal {
     }
 
     private async deleteSelectedFiles(filesToDelete: TFile[]): Promise<void> {
-        const deleteOption = this.plugin.settings.deleteOption || '.trash';
         let deletedCount = 0;
 
         for (const file of filesToDelete) {
@@ -143,13 +142,9 @@ export class SelectiveDeleteModal extends Modal {
                 continue;
             }
 
-            if (deleteOption === '.trash' || deleteOption === 'system-trash') {
-                await this.plugin.app.fileManager.trashFile(file);
-            } else if (deleteOption === 'permanent') {
-                await this.plugin.app.vault.delete(file);
-            } else {
-                throw new Error(`Unsupported delete option: ${deleteOption}`);
-            }
+            // FileManager honours the user's configured deletion destination
+            // (Obsidian trash, system trash or permanent deletion).
+            await this.plugin.app.fileManager.trashFile(file);
             deletedCount++;
         }
 
@@ -160,6 +155,3 @@ export class SelectiveDeleteModal extends Modal {
         this.contentEl.empty();
     }
 }
-
-const getErrorMessage = (error: unknown): string =>
-    error instanceof Error ? error.message : String(error);

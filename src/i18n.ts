@@ -33,11 +33,6 @@ export interface I18nTranslations {
     'settings.ribbonIcon.desc': string;
     'settings.logsModal.name': string;
     'settings.logsModal.desc': string;
-    'settings.deleteOption.name': string;
-    'settings.deleteOption.desc': string;
-    'settings.deleteOption.permanent': string;
-    'settings.deleteOption.obsidian.trash': string;
-    'settings.deleteOption.system.trash': string;
     'settings.excludedFolders.name': string;
     'settings.excludedFolders.desc': string;
     'settings.excludedFiles.name': string;
@@ -54,9 +49,7 @@ export interface I18nTranslations {
     'modal.file.path.click.hint': string;
     
     // 删除日志
-    'logs.moved.obsidian.trash': string;
-    'logs.moved.system.trash': string;
-    'logs.deleted.permanently': string;
+    'logs.moved.trash': string;
 }
 
 // 默认英文翻译
@@ -85,11 +78,6 @@ const enTranslations: Partial<I18nTranslations> = {
     'settings.ribbonIcon.desc': 'Show icon in ribbon for quick access to clear images.',
     'settings.logsModal.name': 'Deletion Logs',
     'settings.logsModal.desc': 'Show logs modal after deletion completes.',
-    'settings.deleteOption.name': 'Deleted Images Destination',
-    'settings.deleteOption.desc': 'Choose where deleted images will be moved',
-    'settings.deleteOption.permanent': 'Permanently delete',
-    'settings.deleteOption.obsidian.trash': 'Move to Obsidian Trash',
-    'settings.deleteOption.system.trash': 'Move to System Trash',
     'settings.excludedFolders.name': 'Excluded Folders Full Paths',
     'settings.excludedFolders.desc': `Provide full paths of folders to exclude (case-sensitive), separated by commas.
 					Example: To exclude images under Personal/Files/Zodiac -> Use Personal/Files/Zodiac`,
@@ -105,9 +93,7 @@ const enTranslations: Partial<I18nTranslations> = {
     'modal.ignore.file': 'Ignore this file',
     'modal.file.path.click.hint': 'Click to open file',
     
-    'logs.moved.obsidian.trash': 'Moved to Obsidian Trash',
-    'logs.moved.system.trash': 'Moved to System Trash',
-    'logs.deleted.permanently': 'Deleted Permanently',
+    'logs.moved.trash': 'Moved to trash',
 };
 
 // 中文翻译
@@ -136,11 +122,6 @@ const zhCNTranslations: Partial<I18nTranslations> = {
     'settings.ribbonIcon.desc': '开启后将在功能区显示清除图片的图标。',
     'settings.logsModal.name': '删除日志',
     'settings.logsModal.desc': '关闭后将不会在删除完成后弹出查看删除日志的模态框。如果没有删除任何图片，则不会出现此弹窗。',
-    'settings.deleteOption.name': '已删除图片的目标位置',
-    'settings.deleteOption.desc': '选择图片删除后的存放位置',
-    'settings.deleteOption.permanent': '永久删除',
-    'settings.deleteOption.obsidian.trash': '移动到 Obsidian 回收站',
-    'settings.deleteOption.system.trash': '移动到系统回收站',
     'settings.excludedFolders.name': '排除的文件夹完整路径',
     'settings.excludedFolders.desc': `提供要排除的文件夹的完整路径（区分大小写），用逗号（,）分隔。
 					例如：如果要排除 Personal/Files/Zodiac 下的图片 -> 应使用 Personal/Files/Zodiac 进行排除`,
@@ -156,9 +137,7 @@ const zhCNTranslations: Partial<I18nTranslations> = {
     'modal.ignore.file': '忽略此文件',
     'modal.file.path.click.hint': '点击打开文件',
     
-    'logs.moved.obsidian.trash': '移动到 Obsidian 回收站',
-    'logs.moved.system.trash': '移动到系统回收站',
-    'logs.deleted.permanently': '永久删除',
+    'logs.moved.trash': '已移至回收站',
 };
 
 // 繁体中文翻译
@@ -187,11 +166,6 @@ const zhTWTranslations: Partial<I18nTranslations> = {
     'settings.ribbonIcon.desc': '開啟後將在功能區顯示清除圖片的圖標。',
     'settings.logsModal.name': '刪除日誌',
     'settings.logsModal.desc': '關閉後將不會在刪除完成後彈出查看刪除日誌的模態框。如果沒有刪除任何圖片，則不會出現此彈窗。',
-    'settings.deleteOption.name': '已刪除圖片的目標位置',
-    'settings.deleteOption.desc': '選擇圖片刪除後的存放位置',
-    'settings.deleteOption.permanent': '永久刪除',
-    'settings.deleteOption.obsidian.trash': '移動到 Obsidian 回收站',
-    'settings.deleteOption.system.trash': '移動到系統回收站',
     'settings.excludedFolders.name': '排除的資料夾完整路徑',
     'settings.excludedFolders.desc': `提供要排除的資料夾的完整路徑（區分大小寫），用逗號（,）分隔。
 					例如：如果要排除 Personal/Files/Zodiac 下的圖片 -> 應使用 Personal/Files/Zodiac 進行排除`,
@@ -207,9 +181,7 @@ const zhTWTranslations: Partial<I18nTranslations> = {
     'modal.ignore.file': '忽略此檔案',
     'modal.file.path.click.hint': '點擊打開檔案',
     
-    'logs.moved.obsidian.trash': '移動到 Obsidian 回收站',
-    'logs.moved.system.trash': '移動到系統回收站',
-    'logs.deleted.permanently': '永久刪除',
+    'logs.moved.trash': '已移至資源回收筒',
 };
 
 // 语言包映射

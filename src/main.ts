@@ -13,8 +13,7 @@ export default class OzanClearImages extends Plugin {
         i18n.initialize(this.app);
         this.addSettingTab(new OzanClearImagesSettingsTab(this.app, this));
         void this.initialize().catch((error: unknown) => {
-            const message = error instanceof Error ? error.message : String(error);
-            new Notice(`Could not initialize plugin: ${message}`);
+            new Notice(`Could not initialize plugin: ${Util.getErrorMessage(error)}`);
         });
     }
 
@@ -44,9 +43,6 @@ export default class OzanClearImages extends Plugin {
     async loadSettings(): Promise<void> {
         const data: unknown = await this.loadData();
         this.settings = {
-            deleteOption: isRecord(data) && typeof data.deleteOption === 'string'
-                ? data.deleteOption
-                : DEFAULT_SETTINGS.deleteOption,
             logsModal: isRecord(data) && typeof data.logsModal === 'boolean'
                 ? data.logsModal
                 : DEFAULT_SETTINGS.logsModal,
@@ -95,8 +91,7 @@ export default class OzanClearImages extends Plugin {
                 new Notice(i18n.t(type === 'image' ? 'notice.all.images.used' : 'notice.all.attachments.used'));
             }
         } catch (error) {
-            const message = error instanceof Error ? error.message : String(error);
-            new Notice(`Could not scan attachments: ${message}`);
+            new Notice(`Could not scan attachments: ${Util.getErrorMessage(error)}`);
         }
     };
 }

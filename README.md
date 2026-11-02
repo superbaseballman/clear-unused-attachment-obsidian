@@ -26,13 +26,7 @@ Enable this option to add a cleanup icon to the ribbon.
 
 ### Deletion destination
 
-Choose how deleted files should be handled:
-
-![Deletion destination setting](images/delete-destination.png)
-
-1. **Move to Obsidian trash** — Use Obsidian's configured trash preference.
-2. **Move to system trash** — Move files to the operating system's trash.
-3. **Delete permanently** — Permanently delete files; this cannot be undone.
+Deleted files are removed with `FileManager.trashFile()`, so Obsidian's own **Settings → Files and links → Deleted files** preference decides whether files go to the Obsidian trash, the system trash, or are deleted permanently.
 
 ### Excluded folders
 
@@ -65,7 +59,6 @@ If all files are in use or excluded, the plugin shows a notice and does not open
 
 ## Planned features
 
-- [x] Choose a destination for deleted files
 - [x] Exclude folders from scans
 - [x] Internationalization (i18n)
 
@@ -133,15 +126,7 @@ Thanks to all contributors and the Obsidian community for their support!
 
 ### 已删除图片的目标位置
 
-请确保在"清除图片设置"标签下选择已删除图片的目标位置。您有 3 个选项:
-
-![删除目标设置](images/delete-destination.png)
-
-1. **移动到 Obsidian 回收站** - 文件将被移动到 Obsidian Vault 下的 `.trash` 文件夹。
-
-2. **移动到系统回收站** - 文件将被移动到操作系统的回收站。
-
-3. **永久删除** - 文件将被永久销毁，无法恢复。
+删除文件时会调用 `FileManager.trashFile()`，因此删除位置由 Obsidian 自身的 **设置 → 文件与链接 → 删除的文件** 选项决定（Obsidian 回收站 / 系统回收站 / 永久删除）。
 
 ### 排除的文件夹
 
@@ -185,7 +170,6 @@ Thanks to all contributors and the Obsidian community for their support!
 
 ## 计划功能
 
--   [x] 创建用户选择已删除文件目的地的设置
 -   [x] 扫描的排除文件夹设置
 -   [x] **国际化 (i18n) 支持** ✨ 新功能!
 
