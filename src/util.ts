@@ -10,9 +10,10 @@ const imageExtensions: Set<string> = new Set(['jpeg', 'jpg', 'png', 'gif', 'svg'
 
 // Create the List of Unused Images
 export const getUnusedAttachments = async (app: App, type: 'image' | 'all') => {
-    const allAttachmentsInVault = getAttachmentsInVault(app, type);
+    const allFiles = app.vault.getFiles();
+    const allAttachmentsInVault = getAttachmentsInVault(allFiles, type);
     const unusedAttachments: TFile[] = [];
-    const usedAttachmentsSet = await getAttachmentPathSetForVault(app);
+    const usedAttachmentsSet = await getAttachmentPathSetForVault(app, allFiles);
 
     // Compare All Attachments vs Used Attachments
     allAttachmentsInVault.forEach((attachment) => {
@@ -23,8 +24,7 @@ export const getUnusedAttachments = async (app: App, type: 'image' | 'all') => {
 };
 
 // Getting all available images saved in vault
-const getAttachmentsInVault = (app: App, type: 'image' | 'all'): TFile[] => {
-    const allFiles = app.vault.getFiles();
+const getAttachmentsInVault = (allFiles: TFile[], type: 'image' | 'all'): TFile[] => {
     const attachments: TFile[] = [];
     for (const file of allFiles) {
         if (!['md', 'canvas'].includes(file.extension)) {
@@ -42,7 +42,7 @@ const getAttachmentsInVault = (app: App, type: 'image' | 'all'): TFile[] => {
 };
 
 // New Method for Getting All Used Attachments
-const getAttachmentPathSetForVault = async (app: App): Promise<Set<string>> => {
+const getAttachmentPathSetForVault = async (app: App, allFiles: TFile[]): Promise<Set<string>> => {
     const attachmentsSet = new Set<string>();
     const resolvedLinks = app.metadataCache.resolvedLinks;
 
@@ -58,7 +58,6 @@ const getAttachmentPathSetForVault = async (app: App): Promise<Set<string>> => {
     }
 
     // 步骤 2：补充解析 Frontmatter 和 Canvas（官方 API 覆盖不到的场景）
-    const allFiles = app.vault.getFiles();
     for (const file of allFiles) {
         // 2.1 处理 Markdown 文件的 Frontmatter
         if (file.extension === 'md') {
@@ -128,8 +127,9 @@ export const deleteFilesInTheList = async (
 ): Promise<{ deletedImages: number; textToView: string }> => {
     let deletedImages = 0;
     let textToView = '';
+    const isInExcludedFolder = createExcludedFolderMatcher(plugin);
     for (const file of fileList) {
-        if (fileIsInExcludedFolder(file, plugin)) {
+        if (isInExcludedFolder(file)) {
             continue;
         } else {
             // FileManager honours the user's configured deletion destination
@@ -144,49 +144,30 @@ export const deleteFilesInTheList = async (
 
 // Check if File is Under Excluded Folders
 export const fileIsInExcludedFolder = (file: TFile, plugin: OzanClearImages): boolean => {
+    return createExcludedFolderMatcher(plugin)(file);
+};
+
+export const createExcludedFolderMatcher = (plugin: OzanClearImages): ((file: TFile) => boolean) => {
     const excludedFoldersSettings = plugin.settings.excludedFolders;
     const excludeSubfolders = plugin.settings.excludeSubfolders;
     if (excludedFoldersSettings === '') {
-        return false;
-    } else {
-        // Get All Excluded Folder Paths
-        const excludedFolderPaths = excludedFoldersSettings.split(',').map((folderPath) => {
-            return folderPath.trim();
-        });
-
-        // Handle the case where file might not have a parent (shouldn't happen for files in folders, but be safe)
-        if (!file.parent) {
-            return false;
-        }
-
-        if (excludeSubfolders) {
-            // If subfolders included, check if the file's parent path starts with any excluded folder path
-            for (const excludedFolderPath of excludedFolderPaths) {
-                // Normalize the excluded path to ensure proper matching by adding a trailing slash
-                // This prevents partial matches like 'Attach' matching 'Attachment'
-                let normalizedExcludedPath = excludedFolderPath;
-                if (!normalizedExcludedPath.endsWith('/')) {
-                    normalizedExcludedPath += '/';
-                }
-                
-                let normalizedFilePath = file.parent.path;
-                if (!normalizedFilePath.endsWith('/')) {
-                    normalizedFilePath += '/';
-                }
-                
-                if (normalizedFilePath.startsWith(normalizedExcludedPath)) {
-                    return true;
-                }
-            }
-        } else {
-            // Full path of parent should match if subfolders are not included
-            if (excludedFolderPaths.includes(file.parent.path)) {
-                return true;
-            }
-        }
-
-        return false;
+        return () => false;
     }
+
+    const excludedFolderPaths = excludedFoldersSettings.split(',').map((folderPath) => folderPath.trim());
+    if (excludeSubfolders) {
+        const excludedFolderPrefixes = excludedFolderPaths.map((folderPath) =>
+            folderPath.endsWith('/') ? folderPath : `${folderPath}/`
+        );
+        return (file) => {
+            if (!file.parent) return false;
+            const parentPath = file.parent.path.endsWith('/') ? file.parent.path : `${file.parent.path}/`;
+            return excludedFolderPrefixes.some((prefix) => parentPath.startsWith(prefix));
+        };
+    }
+
+    const excludedFolderPathSet = new Set(excludedFolderPaths);
+    return (file) => !!file.parent && excludedFolderPathSet.has(file.parent.path);
 };
 
 /* ------------------ Helpers  ------------------ */

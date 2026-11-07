@@ -1,7 +1,7 @@
 import { Modal, App, TFile, Notice } from 'obsidian';
 import { i18n } from './i18n';
 import type OzanClearImages from './main';
-import { fileIsInExcludedFolder, getErrorMessage } from './util';
+import { createExcludedFolderMatcher, getErrorMessage } from './util';
 
 export class LogsModal extends Modal {
     constructor(textToView: string, app: App) {
@@ -22,11 +22,14 @@ export class LogsModal extends Modal {
 }
 
 export class SelectiveDeleteModal extends Modal {
+    private readonly unusedFilesByPath: Map<string, TFile>;
+
     constructor(
         private readonly unusedFiles: TFile[],
         private readonly plugin: OzanClearImages
     ) {
         super(plugin.app);
+        this.unusedFilesByPath = new Map(unusedFiles.map((file) => [file.path, file]));
     }
 
     onOpen(): void {
@@ -117,7 +120,7 @@ export class SelectiveDeleteModal extends Modal {
         const checkboxes = fileListContainer.querySelectorAll<HTMLInputElement>('.file-checkbox');
         const filesToDelete = Array.from(checkboxes)
             .filter((checkbox) => checkbox.checked)
-            .map((checkbox) => this.unusedFiles.find((file) => file.path === checkbox.value))
+            .map((checkbox) => this.unusedFilesByPath.get(checkbox.value))
             .filter((file): file is TFile => file !== undefined);
 
         if (filesToDelete.length === 0) {
@@ -136,9 +139,10 @@ export class SelectiveDeleteModal extends Modal {
 
     private async deleteSelectedFiles(filesToDelete: TFile[]): Promise<void> {
         let deletedCount = 0;
+        const isInExcludedFolder = createExcludedFolderMatcher(this.plugin);
 
         for (const file of filesToDelete) {
-            if (fileIsInExcludedFolder(file, this.plugin)) {
+            if (isInExcludedFolder(file)) {
                 continue;
             }
 

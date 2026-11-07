@@ -79,10 +79,12 @@ export default class OzanClearImages extends Plugin {
     clearUnusedAttachments = async (type: 'all' | 'image'): Promise<void> => {
         try {
             const unusedAttachments = await Util.getUnusedAttachments(this.app, type);
+            const isInExcludedFolder = Util.createExcludedFolderMatcher(this);
+            const excludedFiles = new Set(this.settings.excludedFiles);
             const filteredUnusedAttachments = unusedAttachments.filter(
                 (file) =>
-                    !Util.fileIsInExcludedFolder(file, this) &&
-                    !this.settings.excludedFiles.includes(file.path)
+                    !isInExcludedFolder(file) &&
+                    !excludedFiles.has(file.path)
             );
 
             if (filteredUnusedAttachments.length > 0) {
