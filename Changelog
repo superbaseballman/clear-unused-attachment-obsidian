@@ -5,6 +5,10 @@ All notable changes to this Obsidian Attachment Cleaner plugin will be documente
 The format is based on [Keep a Changelog](https://keepachangelog.com/zh-CN/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/lang/zh-CN/).
 
+## [1.1.6] - 2026-11-07
+### Changed
+- 提升扫描性能
+
 ## [1.1.4] - 2026-11-02
 ### Changed
 - Bump minimum supported Obsidian version to 1.14
