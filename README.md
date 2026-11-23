@@ -42,6 +42,10 @@ Enable the subfolder option to also exclude files in subfolders.
 
 The cleanup dialog lists unused files with checkboxes. Select **Ignore this file** to add a file to the exclusion list so it is omitted from future scans. Ignored paths are saved in the plugin's `data.json`.
 
+### Attachment file types
+
+Set comma-separated file extensions (for example, `pdf, png`) to limit **Clear unused attachments** scans to those types. Extensions are case-insensitive and may include a leading dot. Leave the setting blank to scan all file types. **Clear unused images** always scans image files only.
+
 ## Usage
 
 1. Enable the plugin in **Community plugins**.
@@ -143,6 +147,10 @@ Thanks to all contributors and the Obsidian community for their support!
 运行清理时，您将看到一个模态框，显示所有未使用的文件及其复选框。对于每个文件，您可以点击 **"忽略此文件"** 按钮，永久性地将其排除在未来的扫描之外。被忽略的文件路径将保存在插件的 data.json 文件中，不会再出现在未使用文件列表中。
 
 当您想保留某些未使用的图片在 vault 中，而不想在每次运行清理时都被标记出来，这个功能非常有用。
+
+### 附件类型
+
+设置逗号分隔的文件扩展名（例如 `pdf, png`），即可让“清除未使用的附件”仅扫描指定类型。扩展名不区分大小写，可带前导点。留空则扫描所有文件类型。“清除未使用的图片”始终只扫描图片。
 
 ## 使用方法
 

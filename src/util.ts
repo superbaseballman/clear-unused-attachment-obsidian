@@ -8,10 +8,14 @@ import { i18n } from './i18n';
 const imageRegex = /.*(jpe?g|png|gif|svg|bmp)/i;
 const imageExtensions: Set<string> = new Set(['jpeg', 'jpg', 'png', 'gif', 'svg', 'bmp', 'webp']);
 
-// Create the List of Unused Images
-export const getUnusedAttachments = async (app: App, type: 'image' | 'all') => {
+// Create the List of Unused Attachments
+export const getUnusedAttachments = async (
+    app: App,
+    type: 'image' | 'all',
+    attachmentExtensions = ''
+) => {
     const allFiles = app.vault.getFiles();
-    const allAttachmentsInVault = getAttachmentsInVault(allFiles, type);
+    const allAttachmentsInVault = getAttachmentsInVault(allFiles, type, attachmentExtensions);
     const unusedAttachments: TFile[] = [];
     const usedAttachmentsSet = await getAttachmentPathSetForVault(app, allFiles);
 
@@ -23,17 +27,26 @@ export const getUnusedAttachments = async (app: App, type: 'image' | 'all') => {
     return unusedAttachments;
 };
 
-// Getting all available images saved in vault
-const getAttachmentsInVault = (allFiles: TFile[], type: 'image' | 'all'): TFile[] => {
+// Get all eligible attachments saved in the vault
+const getAttachmentsInVault = (
+    allFiles: TFile[],
+    type: 'image' | 'all',
+    attachmentExtensions: string
+): TFile[] => {
     const attachments: TFile[] = [];
+    const selectedExtensions = new Set(
+        attachmentExtensions
+            .split(',')
+            .map((extension) => extension.trim().replace(/^\./, '').toLowerCase())
+            .filter(Boolean)
+    );
     for (const file of allFiles) {
         if (!['md', 'canvas'].includes(file.extension)) {
-            // Only images
-            if (imageExtensions.has(file.extension.toLowerCase())) {
-                attachments.push(file);
-            }
-            // All Files
-            else if (type === 'all') {
+            const extension = file.extension.toLowerCase();
+            if (
+                (type === 'image' && imageExtensions.has(extension)) ||
+                (type === 'all' && (selectedExtensions.size === 0 || selectedExtensions.has(extension)))
+            ) {
                 attachments.push(file);
             }
         }

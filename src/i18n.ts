@@ -37,6 +37,8 @@ export interface I18nTranslations {
     'settings.excludedFolders.desc': string;
     'settings.excludedFiles.name': string;
     'settings.excludedFiles.desc': string;
+    'settings.attachmentExtensions.name': string;
+    'settings.attachmentExtensions.desc': string;
     'settings.excludeSubfolders.name': string;
     'settings.excludeSubfolders.desc': string;
     
@@ -83,6 +85,8 @@ const enTranslations: Partial<I18nTranslations> = {
 					Example: To exclude images under Personal/Files/Zodiac -> Use Personal/Files/Zodiac`,
     'settings.excludedFiles.name': 'Excluded Files Full Paths',
     'settings.excludedFiles.desc': 'Provide full paths of files to exclude (case-sensitive), separated by commas.',
+    'settings.attachmentExtensions.name': 'Attachment file types',
+    'settings.attachmentExtensions.desc': 'Comma-separated extensions to scan (e.g. pdf, png). Leave blank to scan all file types. This applies to Clear unused attachments.',
     'settings.excludeSubfolders.name': 'Exclude Subfolders',
     'settings.excludeSubfolders.desc': 'When enabled, all subfolders of the above folder paths will also be excluded.',
     
@@ -127,6 +131,8 @@ const zhCNTranslations: Partial<I18nTranslations> = {
 					例如：如果要排除 Personal/Files/Zodiac 下的图片 -> 应使用 Personal/Files/Zodiac 进行排除`,
     'settings.excludedFiles.name': '排除的文件完整路径',
     'settings.excludedFiles.desc': '提供要排除的文件的完整路径（区分大小写），用逗号（,）分隔。',
+    'settings.attachmentExtensions.name': '要识别的附件类型',
+    'settings.attachmentExtensions.desc': '输入要扫描的扩展名，以逗号分隔（例如：pdf, png）。留空则扫描所有文件类型。此设置仅影响“清除未使用的附件”。',
     'settings.excludeSubfolders.name': '排除子文件夹',
     'settings.excludeSubfolders.desc': '开启此选项后，将同时排除上述文件夹路径的所有子文件夹。',
     
@@ -171,6 +177,8 @@ const zhTWTranslations: Partial<I18nTranslations> = {
 					例如：如果要排除 Personal/Files/Zodiac 下的圖片 -> 應使用 Personal/Files/Zodiac 進行排除`,
     'settings.excludedFiles.name': '排除的檔案完整路徑',
     'settings.excludedFiles.desc': '提供要排除的檔案的完整路徑（區分大小寫），用逗號（,）分隔。',
+    'settings.attachmentExtensions.name': '要識別的附件類型',
+    'settings.attachmentExtensions.desc': '輸入要掃描的副檔名，以逗號分隔（例如：pdf, png）。留空則掃描所有檔案類型。此設定僅影響「清除未使用的附件」。',
     'settings.excludeSubfolders.name': '排除子資料夾',
     'settings.excludeSubfolders.desc': '開啟此選項後，將同時排除上述資料夾路徑的所有子資料夾。',
     

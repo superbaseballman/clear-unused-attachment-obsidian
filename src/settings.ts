@@ -9,6 +9,7 @@ export interface OzanClearImagesSettings {
     ribbonIcon: boolean;
     excludeSubfolders: boolean;
     excludedFiles: string[];
+    attachmentExtensions: string;
 }
 
 export const DEFAULT_SETTINGS: OzanClearImagesSettings = {
@@ -17,6 +18,7 @@ export const DEFAULT_SETTINGS: OzanClearImagesSettings = {
     ribbonIcon: false,
     excludeSubfolders: false,
     excludedFiles: [],
+    attachmentExtensions: '',
 };
 
 export class OzanClearImagesSettingsTab extends PluginSettingTab {
@@ -50,6 +52,21 @@ export class OzanClearImagesSettingsTab extends PluginSettingTab {
                             type: 'textarea',
                             key: 'excludedFolders',
                             defaultValue: '',
+                        },
+                    },
+                    {
+                        name: i18n.t('settings.attachmentExtensions.name'),
+                        desc: i18n.t('settings.attachmentExtensions.desc'),
+                        render: (setting) => {
+                            setting
+                                .setName(i18n.t('settings.attachmentExtensions.name'))
+                                .setDesc(i18n.t('settings.attachmentExtensions.desc'))
+                                .addTextArea((text) =>
+                                    text.setValue(this.plugin.settings.attachmentExtensions).onChange((value) => {
+                                        this.plugin.settings.attachmentExtensions = value;
+                                        this.persistSettings();
+                                    })
+                                );
                         },
                     },
                     {

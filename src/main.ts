@@ -59,6 +59,9 @@ export default class OzanClearImages extends Plugin {
                 data.excludedFiles.every((file): file is string => typeof file === 'string')
                 ? data.excludedFiles
                 : [],
+            attachmentExtensions: isRecord(data) && typeof data.attachmentExtensions === 'string'
+                ? data.attachmentExtensions
+                : DEFAULT_SETTINGS.attachmentExtensions,
         };
     }
 
@@ -75,10 +78,14 @@ export default class OzanClearImages extends Plugin {
         }
     };
 
-    // Compare Used Images with all images and return unused ones
+    // Compare eligible attachments with used files and return unused ones
     clearUnusedAttachments = async (type: 'all' | 'image'): Promise<void> => {
         try {
-            const unusedAttachments = await Util.getUnusedAttachments(this.app, type);
+            const unusedAttachments = await Util.getUnusedAttachments(
+                this.app,
+                type,
+                type === 'all' ? this.settings.attachmentExtensions : ''
+            );
             const isInExcludedFolder = Util.createExcludedFolderMatcher(this);
             const excludedFiles = new Set(this.settings.excludedFiles);
             const filteredUnusedAttachments = unusedAttachments.filter(

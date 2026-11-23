@@ -46,6 +46,8 @@ interface TemplateI18nTranslations {
     'settings.excludedFolders.desc': string;
     'settings.excludedFiles.name': string;
     'settings.excludedFiles.desc': string;
+    'settings.attachmentExtensions.name': string;
+    'settings.attachmentExtensions.desc': string;
     'settings.excludeSubfolders.name': string;
     'settings.excludeSubfolders.desc': string;
     
@@ -96,6 +98,8 @@ const yourLanguageTranslations: Partial<TemplateI18nTranslations> = {
     'settings.excludedFolders.desc': '',           // 提供要排除的文件夹的完整路径（区分大小写）
     'settings.excludedFiles.name': '',             // 排除的文件完整路径
     'settings.excludedFiles.desc': '',             // 提供要排除的文件的完整路径（区分大小写）
+    'settings.attachmentExtensions.name': '',      // 要识别的附件类型
+    'settings.attachmentExtensions.desc': '',       // 扩展名逗号分隔；留空扫描所有文件类型
     'settings.excludeSubfolders.name': '',         // 排除子文件夹
     'settings.excludeSubfolders.desc': '',         // 开启此选项后，将同时排除上述文件夹路径的所有子文件夹
     
