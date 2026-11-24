@@ -25,7 +25,7 @@ export const getAllLinkMatchesInFile = async (
         }
 
         const fileName = wikiMatch.match(/^\[\[([^|\]]+)/)?.[1];
-        if (fileName && !fileName.startsWith('http')) {
+        if (fileName && isLocalLinkPath(fileName)) {
             addLinkMatch(linkMatches, 'wiki', wikiMatch, fileName, mdFile, app);
         }
     }
@@ -37,8 +37,9 @@ export const getAllLinkMatchesInFile = async (
             continue;
         }
 
-        const fileName = markdownMatch.match(/\]\((.*?)\)/)?.[1];
-        if (fileName && !fileName.startsWith('http')) {
+        const linkTarget = markdownMatch.match(/\]\((.*?)\)/)?.[1];
+        const fileName = linkTarget ? getMarkdownLinkPath(linkTarget) : '';
+        if (fileName && isLocalLinkPath(fileName)) {
             addLinkMatch(linkMatches, 'markdown', markdownMatch, fileName, mdFile, app);
         }
     }
@@ -48,6 +49,16 @@ export const getAllLinkMatchesInFile = async (
 
 const wikiTransclusionRegex = /\[\[([^#]*?)#.*?\]\]/;
 const mdTransclusionRegex = /\[.*?]\(([^#]*?)#.*?\)/;
+
+const getMarkdownLinkPath = (linkTarget: string): string => {
+    const trimmedTarget = linkTarget.trim();
+    const angleBracketTarget = trimmedTarget.match(/^<([^>]*)>/);
+    const path = angleBracketTarget?.[1] ?? trimmedTarget.split(/\s+/, 1)[0];
+    return path.replace(/\\([()])/g, '$1').split('#', 1)[0];
+};
+
+const isLocalLinkPath = (linkPath: string): boolean =>
+    !/^(?:[a-z][a-z\d+.-]*:|\/\/|#)/i.test(linkPath.trim());
 
 const addLinkMatch = (
     linkMatches: LinkMatch[],
@@ -59,7 +70,8 @@ const addLinkMatch = (
 ): void => {
     if (!fileName) return;
 
-    const file = app.metadataCache.getFirstLinkpathDest(fileName, sourceFile.path);
+    const linkPath = type === 'markdown' ? fileName : fileName.split('#', 1)[0];
+    const file = app.metadataCache.getFirstLinkpathDest(linkPath, sourceFile.path);
     linkMatches.push({
         type,
         match,

@@ -5,6 +5,15 @@ All notable changes to this Obsidian Attachment Cleaner plugin will be documente
 The format is based on [Keep a Changelog](https://keepachangelog.com/zh-CN/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/lang/zh-CN/).
 
+## [1.1.7] - 2026-11-23
+### Added
+- 附件清理时提醒指向不存在本地文件的 Markdown 行内链接
+- 增加文件类型检测
+- 支持设置失效行内链接检测开关，并可从结果弹窗定位到链接所在位置
+- 排除路径和附件类型设置改为可启用及切换大小写匹配的规则编辑器
+- 合并排除文件夹和文件路径设置，并简化规则行控件
+- 排除路径改用统一的 Glob 匹配规则
+
 ## [1.1.6] - 2026-11-07
 ### Changed
 - 提升扫描性能

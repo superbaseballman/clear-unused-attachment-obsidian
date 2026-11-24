@@ -1,24 +1,28 @@
 import OzanClearImages from './main';
-import { PluginSettingTab, App, Notice, SettingDefinitionItem } from 'obsidian';
+import { PluginSettingTab, App, Modal, Notice, SettingDefinitionItem, SettingDefinitionRender } from 'obsidian';
 import { i18n } from './i18n';
 import { getErrorMessage } from './util';
 
+export interface FilterRule {
+    value: string;
+    enabled: boolean;
+    caseSensitive: boolean;
+}
+
 export interface OzanClearImagesSettings {
     logsModal: boolean;
-    excludedFolders: string;
+    excludedPaths: FilterRule[];
     ribbonIcon: boolean;
-    excludeSubfolders: boolean;
-    excludedFiles: string[];
     attachmentExtensions: string;
+    checkMissingInlineLinks: boolean;
 }
 
 export const DEFAULT_SETTINGS: OzanClearImagesSettings = {
     logsModal: true,
-    excludedFolders: '',
+    excludedPaths: [],
     ribbonIcon: false,
-    excludeSubfolders: false,
-    excludedFiles: [],
     attachmentExtensions: '',
+    checkMissingInlineLinks: false,
 };
 
 export class OzanClearImagesSettingsTab extends PluginSettingTab {
@@ -45,15 +49,7 @@ export class OzanClearImagesSettingsTab extends PluginSettingTab {
                         desc: i18n.t('settings.logsModal.desc'),
                         control: { type: 'toggle', key: 'logsModal', defaultValue: true },
                     },
-                    {
-                        name: i18n.t('settings.excludedFolders.name'),
-                        desc: i18n.t('settings.excludedFolders.desc'),
-                        control: {
-                            type: 'textarea',
-                            key: 'excludedFolders',
-                            defaultValue: '',
-                        },
-                    },
+                    this.getExcludedPathsSetting(),
                     {
                         name: i18n.t('settings.attachmentExtensions.name'),
                         desc: i18n.t('settings.attachmentExtensions.desc'),
@@ -64,47 +60,20 @@ export class OzanClearImagesSettingsTab extends PluginSettingTab {
                                 .addTextArea((text) =>
                                     text.setValue(this.plugin.settings.attachmentExtensions).onChange((value) => {
                                         this.plugin.settings.attachmentExtensions = value;
-                                        this.persistSettings();
+                                        void this.plugin.saveSettings().catch((error: unknown) => {
+                                            new Notice(`Failed to save settings: ${getErrorMessage(error)}`);
+                                        });
                                     })
                                 );
                         },
                     },
                     {
-                        name: i18n.t('settings.excludedFiles.name'),
-                        desc: i18n.t('settings.excludedFiles.desc'),
-                        render: (setting) => {
-                            setting
-                                .setName(i18n.t('settings.excludedFiles.name'))
-                                .setDesc(i18n.t('settings.excludedFiles.desc'))
-                                .addTextArea((text) =>
-                                    text.setValue(this.plugin.settings.excludedFiles.join(',')).onChange((value) => {
-                                        this.plugin.settings.excludedFiles = value.split(',');
-                                        this.persistSettings();
-                                    })
-                                );
-                        },
-                    },
-                    {
-                        name: i18n.t('settings.excludeSubfolders.name'),
-                        desc: i18n.t('settings.excludeSubfolders.desc'),
+                        name: i18n.t('settings.checkMissingInlineLinks.name'),
+                        desc: i18n.t('settings.checkMissingInlineLinks.desc'),
                         control: {
                             type: 'toggle',
-                            key: 'excludeSubfolders',
-                            defaultValue: false,
-                        },
-                    },
-                    {
-                        name: 'Ko-fi',
-                        searchable: false,
-                        render: (setting) => {
-                            const coffeeDiv = setting.settingEl.createDiv('coffee oz-coffee-div');
-                            const coffeeLink = coffeeDiv.createEl('a', { href: 'https://ko-fi.com/L3L356V6Q' });
-                            const coffeeImg = coffeeLink.createEl('img', {
-                                attr: {
-                                    src: 'https://cdn.ko-fi.com/cdn/kofi2.png?v=3',
-                                },
-                            });
-                            coffeeImg.height = 45;
+                            key: 'checkMissingInlineLinks',
+                            defaultValue: DEFAULT_SETTINGS.checkMissingInlineLinks,
                         },
                     },
                 ],
@@ -119,9 +88,156 @@ export class OzanClearImagesSettingsTab extends PluginSettingTab {
         }
     }
 
-    private persistSettings(): void {
-        void this.plugin.saveSettings().catch((error: unknown) => {
-            new Notice(`Failed to save settings: ${getErrorMessage(error)}`);
+    private getExcludedPathsSetting(): SettingDefinitionRender {
+        const name = i18n.t('settings.excludedPaths.name');
+        const desc = i18n.t('settings.excludedPaths.desc');
+        return {
+            name,
+            desc,
+            render: (setting) => {
+                setting.setName(name).setDesc(desc).addButton((button) =>
+                    button
+                        .setButtonText(i18n.t('settings.filterRules.edit'))
+                        .onClick(() => {
+                            new FilterRulesModal(
+                                this.app,
+                                name,
+                                [
+                                    {
+                                        heading: i18n.t('settings.excludedPaths.group'),
+                                        rules: this.plugin.settings.excludedPaths,
+                                        defaultCaseSensitive: true,
+                                    },
+                                ],
+                                async ([rules]) => {
+                                    this.plugin.settings.excludedPaths = rules;
+                                    await this.plugin.saveSettings();
+                                }
+                            ).open();
+                        })
+                );
+            },
+        };
+    }
+
+}
+
+class FilterRulesModal extends Modal {
+    private readonly groups: {
+        heading: string;
+        rules: FilterRule[];
+        defaultCaseSensitive: boolean;
+    }[];
+    private rulesContainer!: HTMLDivElement;
+
+    constructor(
+        app: App,
+        private readonly heading: string,
+        groups: {
+            heading: string;
+            rules: FilterRule[];
+            defaultCaseSensitive: boolean;
+        }[],
+        private readonly onSave: (groups: FilterRule[][]) => Promise<void>
+    ) {
+        super(app);
+        this.groups = groups.map((group) => ({
+            ...group,
+            rules: group.rules.map((rule) => ({ ...rule })),
+        }));
+    }
+
+    onOpen(): void {
+        this.titleEl.setText(this.heading);
+        this.contentEl.createEl('h3', { text: i18n.t('settings.filterRules.title') });
+        this.contentEl.createEl('p', { text: i18n.t('settings.filterRules.description') });
+        this.rulesContainer = this.contentEl.createDiv({ cls: 'filter-rules-list' });
+        this.renderRules();
+
+        const footer = this.contentEl.createDiv({ cls: 'filter-rules-footer' });
+        footer.createEl('button', {
+            text: i18n.t('settings.filterRules.save'),
+            cls: 'mod-cta',
+        }).addEventListener('click', () => {
+            void this.saveRules();
         });
+        footer.createEl('button', {
+            text: i18n.t('cancel'),
+        }).addEventListener('click', () => this.close());
+    }
+
+    onClose(): void {
+        this.contentEl.empty();
+    }
+
+    private renderRules(): void {
+        this.rulesContainer.empty();
+        this.groups.forEach((group) => {
+            const section = this.rulesContainer.createDiv({ cls: 'filter-rule-group' });
+            section.createEl('h4', { text: group.heading });
+            group.rules.forEach((rule) => {
+                const row = section.createDiv({ cls: 'filter-rule-row' });
+                const enabled = row.createEl('input', { type: 'checkbox' });
+                enabled.checked = rule.enabled;
+                enabled.setAttribute('aria-label', i18n.t('settings.filterRules.enabled'));
+                enabled.addEventListener('change', () => {
+                    rule.enabled = enabled.checked;
+                });
+
+                const valueInput = row.createEl('input', {
+                    type: 'text',
+                    value: rule.value,
+                    cls: 'filter-rule-value',
+                });
+                valueInput.addEventListener('input', () => {
+                    rule.value = valueInput.value;
+                });
+
+                const caseButton = row.createEl('button', {
+                    text: 'Aa',
+                    cls: rule.caseSensitive ? 'filter-rule-case-sensitive' : '',
+                    attr: {
+                        'aria-label': i18n.t('settings.filterRules.caseSensitive'),
+                        'aria-pressed': String(rule.caseSensitive),
+                    },
+                });
+                caseButton.addEventListener('click', () => {
+                    rule.caseSensitive = !rule.caseSensitive;
+                    this.renderRules();
+                });
+
+                row.createEl('button', {
+                    text: i18n.t('settings.filterRules.delete'),
+                    cls: 'filter-rule-delete',
+                }).addEventListener('click', () => {
+                    const index = group.rules.indexOf(rule);
+                    group.rules.splice(index, 1);
+                    this.renderRules();
+                });
+            });
+
+            section.createEl('button', {
+                text: i18n.t('settings.filterRules.add'),
+                cls: 'filter-rules-add-button',
+            }).addEventListener('click', () => {
+                group.rules.push({
+                    value: '',
+                    enabled: true,
+                    caseSensitive: group.defaultCaseSensitive,
+                });
+                this.renderRules();
+            });
+        });
+    }
+
+    private async saveRules(): Promise<void> {
+        try {
+            await this.onSave(this.groups.map((group) =>
+                group.rules.filter((rule) => rule.value.trim().length > 0)
+            ));
+            this.close();
+        } catch (error) {
+            new Notice(`Failed to save settings: ${getErrorMessage(error)}`);
+        }
     }
 }

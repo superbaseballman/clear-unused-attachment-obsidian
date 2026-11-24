@@ -42,17 +42,26 @@ interface TemplateI18nTranslations {
     'settings.ribbonIcon.desc': string;
     'settings.logsModal.name': string;
     'settings.logsModal.desc': string;
-    'settings.excludedFolders.name': string;
-    'settings.excludedFolders.desc': string;
-    'settings.excludedFiles.name': string;
-    'settings.excludedFiles.desc': string;
+    'settings.excludedPaths.name': string;
+    'settings.excludedPaths.desc': string;
+    'settings.excludedPaths.group': string;
     'settings.attachmentExtensions.name': string;
     'settings.attachmentExtensions.desc': string;
-    'settings.excludeSubfolders.name': string;
-    'settings.excludeSubfolders.desc': string;
+    'settings.checkMissingInlineLinks.name': string;
+    'settings.checkMissingInlineLinks.desc': string;
+    'settings.filterRules.edit': string;
+    'settings.filterRules.title': string;
+    'settings.filterRules.description': string;
+    'settings.filterRules.enabled': string;
+    'settings.filterRules.add': string;
+    'settings.filterRules.caseSensitive': string;
+    'settings.filterRules.delete': string;
+    'settings.filterRules.save': string;
     
     // 模态框
     'modal.select.files.to.delete': string;
+    'modal.missing.inline.links.heading': string;
+    'modal.unused.attachments.title': string;
     'modal.delete.selected': string;
     'modal.select.all': string;
     'modal.deselect.all': string;
@@ -94,17 +103,26 @@ const yourLanguageTranslations: Partial<TemplateI18nTranslations> = {
     'settings.ribbonIcon.desc': '',                // 开启后将在功能区显示清除图片的图标
     'settings.logsModal.name': '',                 // 删除日志
     'settings.logsModal.desc': '',                 // 关闭后将不会在删除完成后弹出查看删除日志的模态框
-    'settings.excludedFolders.name': '',           // 排除的文件夹完整路径
-    'settings.excludedFolders.desc': '',           // 提供要排除的文件夹的完整路径（区分大小写）
-    'settings.excludedFiles.name': '',             // 排除的文件完整路径
-    'settings.excludedFiles.desc': '',             // 提供要排除的文件的完整路径（区分大小写）
+    'settings.excludedPaths.name': '',             // 排除文件夹和文件路径
+    'settings.excludedPaths.desc': '',             // 排除路径 Glob 描述
+    'settings.excludedPaths.group': '',             // Glob 分组标题
     'settings.attachmentExtensions.name': '',      // 要识别的附件类型
-    'settings.attachmentExtensions.desc': '',       // 扩展名逗号分隔；留空扫描所有文件类型
-    'settings.excludeSubfolders.name': '',         // 排除子文件夹
-    'settings.excludeSubfolders.desc': '',         // 开启此选项后，将同时排除上述文件夹路径的所有子文件夹
+    'settings.attachmentExtensions.desc': '',       // 管理附件扩展名筛选规则
+    'settings.checkMissingInlineLinks.name': '',   // 检查失效的行内链接
+    'settings.checkMissingInlineLinks.desc': '',   // 开启后提醒不存在的本地行内链接
+    'settings.filterRules.edit': '',              // 编辑规则
+    'settings.filterRules.title': '',              // 过滤规则
+    'settings.filterRules.description': '',       // 规则编辑说明
+    'settings.filterRules.enabled': '',            // 启用规则
+    'settings.filterRules.add': '',                // 添加规则
+    'settings.filterRules.caseSensitive': '',       // 切换是否区分大小写
+    'settings.filterRules.delete': '',             // 删除
+    'settings.filterRules.save': '',               // 保存
     
     // ==================== 模态框 ====================
     'modal.select.files.to.delete': '',    // 选择要删除的文件
+    'modal.missing.inline.links.heading': '', // 失效的本地行内链接
+    'modal.unused.attachments.title': '',   // 未引用的附件
     'modal.delete.selected': '',           // 删除所选文件
     'modal.select.all': '',                // 选择所有文件
     'modal.deselect.all': '',              // 取消选择
@@ -143,12 +161,11 @@ const yourLanguageTranslations: Partial<TemplateI18nTranslations> = {
  *     'settings.ribbonIcon.desc': 'リボンに画像クリアのアイコンを表示します。',
  *     'settings.logsModal.name': '削除ログ',
  *     'settings.logsModal.desc': '削除完了後にログモーダルを表示します。',
- *     'settings.excludedFolders.name': '除外するフォルダーのフルパス',
- *     'settings.excludedFolders.desc': '除外するフォルダーのフルパスをカンマ区切りで指定します（大文字小文字を区別）。',
- *     'settings.excludedFiles.name': '除外するファイルのフルパス',
- *     'settings.excludedFiles.desc': '除外するファイルのフルパスをカンマ区切りで指定します（大文字小文字を区別）。',
- *     'settings.excludeSubfolders.name': 'サブフォルダーを除外',
- *     'settings.excludeSubfolders.desc': '有効にすると、上記のフォルダーパスのすべてのサブフォルダーも除外されます。',
+ *     'settings.excludedPaths.name': '除外するフォルダーとファイルのパス',
+ *     'settings.excludedPaths.desc': 'Vault 相対パスに一致する Glob パターンを指定します。',
+ *     'settings.excludedPaths.group': 'Glob パターン',
+ *     'settings.attachmentExtensions.name': '添付ファイルの種類',
+ *     'settings.attachmentExtensions.desc': 'スキャンする拡張子をカンマ区切りで指定します。空欄の場合はすべての種類をスキャンします。',
  *     
  *     'modal.select.files.to.delete': '削除するファイルを選択',
  *     'modal.delete.selected': '選択したファイルを削除',

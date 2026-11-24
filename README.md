@@ -28,15 +28,11 @@ Enable this option to add a cleanup icon to the ribbon.
 
 Deleted files are removed with `FileManager.trashFile()`, so Obsidian's own **Settings → Files and links → Deleted files** preference decides whether files go to the Obsidian trash, the system trash, or are deleted permanently.
 
-### Excluded folders
+### Excluded paths
 
-Add comma-separated vault-relative folder paths to exclude files in those folders from cleanup.
+Use **Edit rules** to add glob patterns matching vault-relative paths. `*` matches within one folder, `**` spans folders, and `?` matches one character. For example, `Images/**` excludes a folder and its contents, while `Images/logo.png` matches one file. Rules can be enabled and set to match case-sensitively or insensitively.
 
-![Excluded folders setting](images/excluded-folders.png)
-
-Enable the subfolder option to also exclude files in subfolders.
-
-![Exclude subfolders setting](images/exclude-subfolders.png)
+![Excluded paths setting](images/excluded-folders.png)
 
 ### Ignore specific files
 
@@ -44,7 +40,11 @@ The cleanup dialog lists unused files with checkboxes. Select **Ignore this file
 
 ### Attachment file types
 
-Set comma-separated file extensions (for example, `pdf, png`) to limit **Clear unused attachments** scans to those types. Extensions are case-insensitive and may include a leading dot. Leave the setting blank to scan all file types. **Clear unused images** always scans image files only.
+Enter comma-separated extensions (for example, `pdf, png`) to include in **Clear unused attachments** scans. Leave the field empty to scan all file types. **Clear unused images** always scans image files only.
+
+### Missing inline links
+
+Enable **Check missing inline links** to include warnings for local Markdown inline links whose targets do not exist. Click a link in the results dialog to open its source note and select the link at its exact line and column.
 
 ## Usage
 
@@ -132,15 +132,11 @@ Thanks to all contributors and the Obsidian community for their support!
 
 删除文件时会调用 `FileManager.trashFile()`，因此删除位置由 Obsidian 自身的 **设置 → 文件与链接 → 删除的文件** 选项决定（Obsidian 回收站 / 系统回收站 / 永久删除）。
 
-### 排除的文件夹
+### 排除文件夹和文件路径
 
-您可以排除某些文件夹，在扫描过程中不会移除这些文件夹中的图片。如果需要排除多个文件夹，可以用逗号分隔。请确保提供 vault 中的完整路径:
+点击“编辑规则”添加匹配 vault 相对路径的 Glob 模式。`*` 匹配当前文件夹内的字符，`**` 可跨越文件夹，`?` 匹配单个字符。例如，`Images/**` 可排除文件夹及其内容，`Images/logo.png` 可匹配单个文件。每条规则均可启用或停用，并设置是否区分大小写。
 
 ![排除文件夹设置](images/excluded-folders.png)
-
-您现在可以排除上述提供的文件夹路径下的所有子文件夹:
-
-![排除子文件夹设置](images/exclude-subfolders.png)
 
 ### 忽略特定文件
 
@@ -150,7 +146,11 @@ Thanks to all contributors and the Obsidian community for their support!
 
 ### 附件类型
 
-设置逗号分隔的文件扩展名（例如 `pdf, png`），即可让“清除未使用的附件”仅扫描指定类型。扩展名不区分大小写，可带前导点。留空则扫描所有文件类型。“清除未使用的图片”始终只扫描图片。
+输入逗号分隔的扩展名（例如 `pdf, png`），限定“清除未使用的附件”要扫描的文件类型。留空时扫描所有文件类型。“清除未使用的图片”始终只扫描图片。
+
+### 失效的行内链接
+
+开启“检测失效的行内链接”后，清理时会同时检查指向不存在本地文件的 Markdown 行内链接。在结果弹窗中点击链接，可打开来源笔记并定位到链接所在行列。
 
 ## 使用方法
 

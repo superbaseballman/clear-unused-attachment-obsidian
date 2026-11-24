@@ -33,17 +33,26 @@ export interface I18nTranslations {
     'settings.ribbonIcon.desc': string;
     'settings.logsModal.name': string;
     'settings.logsModal.desc': string;
-    'settings.excludedFolders.name': string;
-    'settings.excludedFolders.desc': string;
-    'settings.excludedFiles.name': string;
-    'settings.excludedFiles.desc': string;
+    'settings.excludedPaths.name': string;
+    'settings.excludedPaths.desc': string;
+    'settings.excludedPaths.group': string;
     'settings.attachmentExtensions.name': string;
     'settings.attachmentExtensions.desc': string;
-    'settings.excludeSubfolders.name': string;
-    'settings.excludeSubfolders.desc': string;
+    'settings.checkMissingInlineLinks.name': string;
+    'settings.checkMissingInlineLinks.desc': string;
+    'settings.filterRules.edit': string;
+    'settings.filterRules.title': string;
+    'settings.filterRules.description': string;
+    'settings.filterRules.enabled': string;
+    'settings.filterRules.add': string;
+    'settings.filterRules.caseSensitive': string;
+    'settings.filterRules.delete': string;
+    'settings.filterRules.save': string;
     
     // 模态框
     'modal.select.files.to.delete': string;
+    'modal.missing.inline.links.heading': string;
+    'modal.unused.attachments.title': string;
     'modal.delete.selected': string;
     'modal.select.all': string;
     'modal.deselect.all': string;
@@ -80,17 +89,25 @@ const enTranslations: Partial<I18nTranslations> = {
     'settings.ribbonIcon.desc': 'Show icon in ribbon for quick access to clear images.',
     'settings.logsModal.name': 'Deletion Logs',
     'settings.logsModal.desc': 'Show logs modal after deletion completes.',
-    'settings.excludedFolders.name': 'Excluded Folders Full Paths',
-    'settings.excludedFolders.desc': `Provide full paths of folders to exclude (case-sensitive), separated by commas.
-					Example: To exclude images under Personal/Files/Zodiac -> Use Personal/Files/Zodiac`,
-    'settings.excludedFiles.name': 'Excluded Files Full Paths',
-    'settings.excludedFiles.desc': 'Provide full paths of files to exclude (case-sensitive), separated by commas.',
+    'settings.excludedPaths.name': 'Excluded folder and file paths (glob)',
+    'settings.excludedPaths.desc': 'Use vault-relative glob patterns. * matches within one folder, ** spans folders, and ? matches one character. Examples: Images/** or Images/logo.png.',
+    'settings.excludedPaths.group': 'Glob patterns',
     'settings.attachmentExtensions.name': 'Attachment file types',
-    'settings.attachmentExtensions.desc': 'Comma-separated extensions to scan (e.g. pdf, png). Leave blank to scan all file types. This applies to Clear unused attachments.',
-    'settings.excludeSubfolders.name': 'Exclude Subfolders',
-    'settings.excludeSubfolders.desc': 'When enabled, all subfolders of the above folder paths will also be excluded.',
+    'settings.attachmentExtensions.desc': 'Enter comma-separated file extensions to scan (e.g. pdf, png). Leave empty to scan all file types. Applies to Clear unused attachments.',
+    'settings.checkMissingInlineLinks.name': 'Check missing inline links',
+    'settings.checkMissingInlineLinks.desc': 'When enabled, warn when a local inline Markdown link points to a file that does not exist.',
+    'settings.filterRules.edit': 'Edit rules',
+    'settings.filterRules.title': 'Glob patterns',
+    'settings.filterRules.description': 'Use glob patterns: * matches within one folder, ** spans folders, and ? matches one character. Click Aa to toggle case sensitivity.',
+    'settings.filterRules.enabled': 'Enable rule',
+    'settings.filterRules.add': 'Add rule',
+    'settings.filterRules.caseSensitive': 'Toggle case-sensitive matching',
+    'settings.filterRules.delete': 'Delete',
+    'settings.filterRules.save': 'Save',
     
     'modal.select.files.to.delete': 'Select files to delete',
+    'modal.missing.inline.links.heading': 'Missing local inline links',
+    'modal.unused.attachments.title': 'Unused attachments',
     'modal.delete.selected': 'Delete Selected',
     'modal.select.all': 'Select All',
     'modal.deselect.all': 'Deselect All',
@@ -126,17 +143,25 @@ const zhCNTranslations: Partial<I18nTranslations> = {
     'settings.ribbonIcon.desc': '开启后将在功能区显示清除图片的图标。',
     'settings.logsModal.name': '删除日志',
     'settings.logsModal.desc': '关闭后将不会在删除完成后弹出查看删除日志的模态框。如果没有删除任何图片，则不会出现此弹窗。',
-    'settings.excludedFolders.name': '排除的文件夹完整路径',
-    'settings.excludedFolders.desc': `提供要排除的文件夹的完整路径（区分大小写），用逗号（,）分隔。
-					例如：如果要排除 Personal/Files/Zodiac 下的图片 -> 应使用 Personal/Files/Zodiac 进行排除`,
-    'settings.excludedFiles.name': '排除的文件完整路径',
-    'settings.excludedFiles.desc': '提供要排除的文件的完整路径（区分大小写），用逗号（,）分隔。',
+    'settings.excludedPaths.name': '排除文件夹和文件路径（Glob）',
+    'settings.excludedPaths.desc': '使用相对于 vault 的 Glob 模式。* 匹配当前文件夹内的字符，** 可跨越文件夹，? 匹配单个字符。例如：Images/** 或 Images/logo.png。',
+    'settings.excludedPaths.group': 'Glob 匹配模式',
     'settings.attachmentExtensions.name': '要识别的附件类型',
-    'settings.attachmentExtensions.desc': '输入要扫描的扩展名，以逗号分隔（例如：pdf, png）。留空则扫描所有文件类型。此设置仅影响“清除未使用的附件”。',
-    'settings.excludeSubfolders.name': '排除子文件夹',
-    'settings.excludeSubfolders.desc': '开启此选项后，将同时排除上述文件夹路径的所有子文件夹。',
+    'settings.attachmentExtensions.desc': '输入逗号分隔的扩展名（例如：pdf、png）。留空时扫描所有文件类型。此设置仅影响“清除未使用的附件”。',
+    'settings.checkMissingInlineLinks.name': '检测失效的行内链接',
+    'settings.checkMissingInlineLinks.desc': '开启后，清理时会提醒指向不存在本地文件的 Markdown 行内链接。',
+    'settings.filterRules.edit': '编辑规则',
+    'settings.filterRules.title': 'Glob 匹配模式',
+    'settings.filterRules.description': '使用 Glob 模式：* 匹配当前文件夹内的字符，** 可跨越文件夹，? 匹配单个字符。点击 Aa 可切换是否区分大小写。',
+    'settings.filterRules.enabled': '启用规则',
+    'settings.filterRules.add': '添加规则',
+    'settings.filterRules.caseSensitive': '切换是否区分大小写',
+    'settings.filterRules.delete': '删除',
+    'settings.filterRules.save': '保存',
     
     'modal.select.files.to.delete': '选择要删除的文件',
+    'modal.missing.inline.links.heading': '失效的本地行内链接',
+    'modal.unused.attachments.title': '未引用的附件',
     'modal.delete.selected': '删除所选文件',
     'modal.select.all': '选择所有文件',
     'modal.deselect.all': '取消选择',
@@ -172,17 +197,25 @@ const zhTWTranslations: Partial<I18nTranslations> = {
     'settings.ribbonIcon.desc': '開啟後將在功能區顯示清除圖片的圖標。',
     'settings.logsModal.name': '刪除日誌',
     'settings.logsModal.desc': '關閉後將不會在刪除完成後彈出查看刪除日誌的模態框。如果沒有刪除任何圖片，則不會出現此彈窗。',
-    'settings.excludedFolders.name': '排除的資料夾完整路徑',
-    'settings.excludedFolders.desc': `提供要排除的資料夾的完整路徑（區分大小寫），用逗號（,）分隔。
-					例如：如果要排除 Personal/Files/Zodiac 下的圖片 -> 應使用 Personal/Files/Zodiac 進行排除`,
-    'settings.excludedFiles.name': '排除的檔案完整路徑',
-    'settings.excludedFiles.desc': '提供要排除的檔案的完整路徑（區分大小寫），用逗號（,）分隔。',
+    'settings.excludedPaths.name': '排除資料夾和檔案路徑（Glob）',
+    'settings.excludedPaths.desc': '使用相對於 vault 的 Glob 模式。* 匹配目前資料夾內的字元，** 可跨越資料夾，? 匹配單一字元。例如：Images/** 或 Images/logo.png。',
+    'settings.excludedPaths.group': 'Glob 匹配模式',
     'settings.attachmentExtensions.name': '要識別的附件類型',
-    'settings.attachmentExtensions.desc': '輸入要掃描的副檔名，以逗號分隔（例如：pdf, png）。留空則掃描所有檔案類型。此設定僅影響「清除未使用的附件」。',
-    'settings.excludeSubfolders.name': '排除子資料夾',
-    'settings.excludeSubfolders.desc': '開啟此選項後，將同時排除上述資料夾路徑的所有子資料夾。',
+    'settings.attachmentExtensions.desc': '輸入逗號分隔的副檔名（例如：pdf、png）。留空時掃描所有檔案類型。此設定僅影響「清除未使用的附件」。',
+    'settings.checkMissingInlineLinks.name': '檢查失效的行內連結',
+    'settings.checkMissingInlineLinks.desc': '開啟後，清理時會提醒指向不存在本機檔案的 Markdown 行內連結。',
+    'settings.filterRules.edit': '編輯規則',
+    'settings.filterRules.title': 'Glob 匹配模式',
+    'settings.filterRules.description': '使用 Glob 模式：* 匹配目前資料夾內的字元，** 可跨越資料夾，? 匹配單一字元。點擊 Aa 可切換是否區分大小寫。',
+    'settings.filterRules.enabled': '啟用規則',
+    'settings.filterRules.add': '新增規則',
+    'settings.filterRules.caseSensitive': '切換是否區分大小寫',
+    'settings.filterRules.delete': '刪除',
+    'settings.filterRules.save': '儲存',
     
     'modal.select.files.to.delete': '選擇要刪除的檔案',
+    'modal.missing.inline.links.heading': '失效的本機行內連結',
+    'modal.unused.attachments.title': '未引用的附件',
     'modal.delete.selected': '刪除所選檔案',
     'modal.select.all': '選擇所有檔案',
     'modal.deselect.all': '取消選擇',

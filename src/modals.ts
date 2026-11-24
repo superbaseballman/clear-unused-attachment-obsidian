@@ -1,7 +1,9 @@
-import { Modal, App, TFile, Notice } from 'obsidian';
+import { Modal, App, MarkdownView, TFile, Notice } from 'obsidian';
 import { i18n } from './i18n';
 import type OzanClearImages from './main';
-import { createExcludedFolderMatcher, getErrorMessage } from './util';
+import { createExcludedPathMatcher, getErrorMessage } from './util';
+import { escapeGlobLiteral, globRuleMatches } from './util';
+import type { MissingInlineLink } from './util';
 
 export class LogsModal extends Modal {
     constructor(textToView: string, app: App) {
@@ -21,18 +23,52 @@ export class LogsModal extends Modal {
     }
 }
 
+export class MissingInlineLinksModal extends Modal {
+    constructor(
+        app: App,
+        private readonly missingLinks: MissingInlineLink[]
+    ) {
+        super(app);
+    }
+
+    onOpen(): void {
+        removeModalHeader(this.modalEl);
+        renderMissingInlineLinks(this.app, this.contentEl, this.missingLinks);
+
+        const buttonWrapper = this.contentEl.createDiv({
+            cls: 'unused-images-center-wrapper modal-buttons',
+        });
+        const closeButton = buttonWrapper.createEl('button', {
+            text: i18n.t('close'),
+            cls: 'unused-images-button cancel-button',
+        });
+        closeButton.addEventListener('click', () => this.close());
+    }
+
+    onClose(): void {
+        this.contentEl.empty();
+    }
+}
+
 export class SelectiveDeleteModal extends Modal {
     private readonly unusedFilesByPath: Map<string, TFile>;
 
     constructor(
         private readonly unusedFiles: TFile[],
-        private readonly plugin: OzanClearImages
+        private readonly plugin: OzanClearImages,
+        private readonly missingInlineLinks: MissingInlineLink[] = []
     ) {
         super(plugin.app);
         this.unusedFilesByPath = new Map(unusedFiles.map((file) => [file.path, file]));
     }
 
     onOpen(): void {
+        if (this.missingInlineLinks.length > 0) {
+            removeModalHeader(this.modalEl);
+            renderMissingInlineLinks(this.app, this.contentEl, this.missingInlineLinks);
+            this.contentEl.createEl('h3', { text: i18n.t('modal.unused.attachments.title') });
+        }
+
         const fileListContainer = this.contentEl.createDiv({
             cls: 'unused-images-file-list unused-images-logs',
         });
@@ -94,20 +130,24 @@ export class SelectiveDeleteModal extends Modal {
     }
 
     private async ignoreFile(file: TFile): Promise<void> {
-        if (this.plugin.settings.excludedFiles.includes(file.path)) {
-            new Notice(i18n.t('notice.file.already.ignored'));
-            return;
-        }
-
         try {
-            this.plugin.settings.excludedFiles.push(file.path);
+            if (this.plugin.settings.excludedPaths.some((rule) => globRuleMatches(rule, file.path))) {
+                new Notice(i18n.t('notice.file.already.ignored'));
+                return;
+            }
+
+            this.plugin.settings.excludedPaths.push({
+                value: escapeGlobLiteral(file.path),
+                enabled: true,
+                caseSensitive: true,
+            });
             await this.plugin.saveSettings();
             new Notice(i18n.t('notice.file.ignored', { file: file.path }));
 
             this.close();
             const updatedFiles = this.unusedFiles.filter((unusedFile) => unusedFile.path !== file.path);
             if (updatedFiles.length > 0) {
-                new SelectiveDeleteModal(updatedFiles, this.plugin).open();
+                new SelectiveDeleteModal(updatedFiles, this.plugin, this.missingInlineLinks).open();
             } else {
                 new Notice(i18n.t('notice.all.images.used'));
             }
@@ -139,10 +179,10 @@ export class SelectiveDeleteModal extends Modal {
 
     private async deleteSelectedFiles(filesToDelete: TFile[]): Promise<void> {
         let deletedCount = 0;
-        const isInExcludedFolder = createExcludedFolderMatcher(this.plugin);
+        const isExcludedPath = createExcludedPathMatcher(this.plugin);
 
         for (const file of filesToDelete) {
-            if (isInExcludedFolder(file)) {
+            if (isExcludedPath(file)) {
                 continue;
             }
 
@@ -159,3 +199,65 @@ export class SelectiveDeleteModal extends Modal {
         this.contentEl.empty();
     }
 }
+
+const renderMissingInlineLinks = (
+    app: App,
+    container: HTMLElement,
+    missingLinks: MissingInlineLink[]
+): void => {
+    container.addClass('has-missing-inline-links');
+    container.createEl('h3', { text: i18n.t('modal.missing.inline.links.heading') });
+    const fileListContainer = container.createDiv({
+        cls: 'unused-images-file-list unused-images-logs missing-inline-links-list',
+    });
+
+    missingLinks.forEach(({ sourceFilePath, linkText, line, column, endLine, endColumn }) => {
+        const fileItem = fileListContainer.createDiv({ cls: 'unused-file-item missing-inline-link-item' });
+        fileItem.createSpan({ text: '!', cls: 'missing-inline-link-indicator' });
+        const target = fileItem.createSpan({
+            text: linkText,
+            cls: 'clickable-file-path missing-inline-link-target',
+        });
+
+        fileItem.createSpan({
+            text: `${sourceFilePath}:${line + 1}:${column + 1}`,
+            cls: 'missing-inline-link-source',
+        });
+        target.addEventListener('click', () =>
+            void openInlineLinkSource(app, sourceFilePath, line, column, endLine, endColumn)
+        );
+    });
+};
+
+const removeModalHeader = (modalEl: HTMLElement): void => {
+    modalEl.querySelector('.modal-header')?.classList.remove('modal-header');
+};
+
+const openInlineLinkSource = async (
+    app: App,
+    sourceFilePath: string,
+    line: number,
+    column: number,
+    endLine: number,
+    endColumn: number
+): Promise<void> => {
+    const file = app.vault.getAbstractFileByPath(sourceFilePath);
+    if (!(file instanceof TFile)) {
+        new Notice(`Could not find source file: ${sourceFilePath}`);
+        return;
+    }
+
+    try {
+        const leaf = app.workspace.getLeaf();
+        await leaf.openFile(file);
+        if (leaf.view instanceof MarkdownView) {
+            leaf.view.editor.setSelection(
+                { line, ch: column },
+                { line: endLine, ch: endColumn }
+            );
+            leaf.view.editor.focus();
+        }
+    } catch (error) {
+        new Notice(`Failed to open source link: ${getErrorMessage(error)}`);
+    }
+};

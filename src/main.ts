@@ -1,7 +1,8 @@
 import { Plugin, Notice } from 'obsidian';
 import { OzanClearImagesSettingsTab } from './settings';
 import { OzanClearImagesSettings, DEFAULT_SETTINGS } from './settings';
-import { SelectiveDeleteModal } from './modals';
+import type { FilterRule } from './settings';
+import { MissingInlineLinksModal, SelectiveDeleteModal } from './modals';
 import * as Util from './util';
 import { i18n } from './i18n';
 
@@ -46,22 +47,18 @@ export default class OzanClearImages extends Plugin {
             logsModal: isRecord(data) && typeof data.logsModal === 'boolean'
                 ? data.logsModal
                 : DEFAULT_SETTINGS.logsModal,
-            excludedFolders: isRecord(data) && typeof data.excludedFolders === 'string'
-                ? data.excludedFolders
-                : DEFAULT_SETTINGS.excludedFolders,
+            excludedPaths: isRecord(data)
+                ? loadExcludedPaths(data)
+                : DEFAULT_SETTINGS.excludedPaths,
             ribbonIcon: isRecord(data) && typeof data.ribbonIcon === 'boolean'
                 ? data.ribbonIcon
                 : DEFAULT_SETTINGS.ribbonIcon,
-            excludeSubfolders: isRecord(data) && typeof data.excludeSubfolders === 'boolean'
-                ? data.excludeSubfolders
-                : DEFAULT_SETTINGS.excludeSubfolders,
-            excludedFiles: isRecord(data) && Array.isArray(data.excludedFiles) &&
-                data.excludedFiles.every((file): file is string => typeof file === 'string')
-                ? data.excludedFiles
-                : [],
-            attachmentExtensions: isRecord(data) && typeof data.attachmentExtensions === 'string'
-                ? data.attachmentExtensions
+            attachmentExtensions: isRecord(data)
+                ? loadAttachmentExtensions(data.attachmentExtensions)
                 : DEFAULT_SETTINGS.attachmentExtensions,
+            checkMissingInlineLinks: isRecord(data) && typeof data.checkMissingInlineLinks === 'boolean'
+                ? data.checkMissingInlineLinks
+                : DEFAULT_SETTINGS.checkMissingInlineLinks,
         };
     }
 
@@ -81,21 +78,22 @@ export default class OzanClearImages extends Plugin {
     // Compare eligible attachments with used files and return unused ones
     clearUnusedAttachments = async (type: 'all' | 'image'): Promise<void> => {
         try {
-            const unusedAttachments = await Util.getUnusedAttachments(
+            const { unusedAttachments, missingInlineLinks } = await Util.getUnusedAttachments(
                 this.app,
                 type,
-                type === 'all' ? this.settings.attachmentExtensions : ''
+                type === 'all' ? this.settings.attachmentExtensions : '',
+                this.settings.checkMissingInlineLinks
             );
-            const isInExcludedFolder = Util.createExcludedFolderMatcher(this);
-            const excludedFiles = new Set(this.settings.excludedFiles);
+
+            const isExcludedPath = Util.createExcludedPathMatcher(this);
             const filteredUnusedAttachments = unusedAttachments.filter(
-                (file) =>
-                    !isInExcludedFolder(file) &&
-                    !excludedFiles.has(file.path)
+                (file) => !isExcludedPath(file)
             );
 
             if (filteredUnusedAttachments.length > 0) {
-                new SelectiveDeleteModal(filteredUnusedAttachments, this).open();
+                new SelectiveDeleteModal(filteredUnusedAttachments, this, missingInlineLinks).open();
+            } else if (missingInlineLinks.length > 0) {
+                new MissingInlineLinksModal(this.app, missingInlineLinks).open();
             } else {
                 new Notice(i18n.t(type === 'image' ? 'notice.all.images.used' : 'notice.all.attachments.used'));
             }
@@ -107,3 +105,79 @@ export default class OzanClearImages extends Plugin {
 
 const isRecord = (value: unknown): value is Record<string, unknown> =>
     typeof value === 'object' && value !== null;
+
+const loadFilterRules = (value: unknown, defaultCaseSensitive: boolean): FilterRule[] => {
+    const values = Array.isArray(value)
+        ? value
+        : typeof value === 'string'
+            ? value.split(',')
+            : [];
+    const rules: FilterRule[] = [];
+    for (const entry of values) {
+        if (typeof entry === 'string') {
+            if (!entry.trim()) continue;
+            rules.push({
+                value: entry.trim(),
+                enabled: true,
+                caseSensitive: defaultCaseSensitive,
+            });
+            continue;
+        }
+        if (
+            isRecord(entry) &&
+            typeof entry.value === 'string' &&
+            typeof entry.enabled === 'boolean' &&
+            typeof entry.caseSensitive === 'boolean'
+        ) {
+            if (!entry.value.trim()) continue;
+            rules.push({
+                value: entry.value,
+                enabled: entry.enabled,
+                caseSensitive: entry.caseSensitive,
+            });
+        }
+    }
+    return rules;
+};
+
+const loadExcludedPaths = (data: Record<string, unknown>): FilterRule[] => {
+    if (Array.isArray(data.excludedPaths)) {
+        return loadFilterRules(data.excludedPaths, true);
+    }
+
+    const excludeSubfolders = data.excludeSubfolders === true;
+    const folders = loadFilterRules(data.excludedFolders, true).map((rule) => ({
+        ...rule,
+        value: `${Util.escapeGlobLiteral(rule.value.trim().replace(/\/+$/, ''))}${excludeSubfolders ? '/**' : '/*'}`,
+    }));
+    const files = loadFilterRules(data.excludedFiles, true).map((rule) => ({
+        ...rule,
+        value: Util.escapeGlobLiteral(rule.value),
+    }));
+    return [...folders, ...files];
+};
+
+const loadAttachmentExtensions = (value: unknown): string => {
+    if (typeof value === 'string') {
+        return value;
+    }
+    if (!Array.isArray(value)) {
+        return DEFAULT_SETTINGS.attachmentExtensions;
+    }
+
+    const extensions: string[] = [];
+    value.forEach((entry: unknown) => {
+        if (typeof entry === 'string') {
+            if (entry.trim()) extensions.push(entry.trim());
+            return;
+        }
+        if (
+            isRecord(entry) &&
+            typeof entry.value === 'string' &&
+            entry.enabled === true
+        ) {
+            if (entry.value.trim()) extensions.push(entry.value.trim());
+        }
+    });
+    return extensions.join(', ');
+};

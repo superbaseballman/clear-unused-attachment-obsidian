@@ -20,6 +20,38 @@
     gap: 8px;
 }
 
+.missing-inline-links-list {
+    max-height: 60vh;
+    overflow-y: auto;
+}
+
+.has-missing-inline-links .missing-inline-links-list {
+    max-height: 25vh;
+}
+
+.missing-inline-link-item {
+    align-items: center;
+}
+
+.missing-inline-link-target {
+    flex-grow: 1;
+    min-width: 0;
+    overflow-wrap: anywhere;
+}
+
+.missing-inline-link-source {
+    flex-shrink: 0;
+    color: var(--text-muted);
+    font-size: var(--font-ui-smaller);
+}
+
+.missing-inline-link-indicator {
+    flex-shrink: 0;
+    width: 16px;
+    color: var(--text-error);
+    text-align: center;
+}
+
 .file-checkbox {
     flex-shrink: 0;
 }
@@ -45,4 +77,51 @@
     cursor: pointer;
     color: var(--text-muted);
     transition: all 0.2s ease;
+}
+
+.filter-rules-list {
+    max-height: 55vh;
+    overflow-y: auto;
+}
+
+.filter-rule-row {
+    display: grid;
+    grid-template-columns: 20px minmax(100px, 1fr) 42px 58px;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 8px;
+}
+
+.filter-rule-group {
+    margin-bottom: 16px;
+}
+
+.filter-rule-value {
+    min-width: 0;
+    width: 100%;
+}
+
+.filter-rule-case-sensitive {
+    color: var(--text-accent);
+    font-weight: var(--font-semibold);
+}
+
+.filter-rules-add-button {
+    display: block;
+    margin: 8px 0 0 auto;
+}
+
+.filter-rules-footer {
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
+    margin-top: 16px;
+    padding-top: 12px;
+    border-top: 1px solid var(--background-modifier-border);
+}
+
+@media (max-width: 600px) {
+    .filter-rule-row {
+        grid-template-columns: 20px minmax(60px, 1fr) 36px 50px;
+    }
 }
